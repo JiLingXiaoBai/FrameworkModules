@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine.Events;
 
-namespace JLXB.Framework
+namespace JLXB.Framework.Event
 {
     public interface IEventData
     {

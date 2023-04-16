@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
-using JLXB.Framework;
+using JLXB.Framework.Event;
 
-public class TestMessage : MonoBehaviour
+public class TestEvent : MonoBehaviour
 {
     [SerializeField] private int loopCount = 100000;
 
     void Start()
     {
-        EventManager.Instance.Register<int>(MessageDefine.TEST_MESSAGE, TestMessage1);
+        EventCenter.Instance.Register<int>(EventConst.TEST_MESSAGE, TestMessage1);
     }
 
     private void OnDestroy()
     {
-        EventManager.Instance.Remove<int>(MessageDefine.TEST_MESSAGE, TestMessage1);
+        EventCenter.Instance.Remove<int>(EventConst.TEST_MESSAGE, TestMessage1);
     }
 
     void Update()
@@ -22,8 +22,8 @@ public class TestMessage : MonoBehaviour
         {
             for (int i = 0; i < loopCount; i++)
             {
-                EventManager.Instance.DispatchEvent<int>(MessageDefine.TEST_MESSAGE, 1);
-                //EventManager.Instance.DispatchEvent<string>(MessageDefine.TEST_MESSAGE, "2");
+                EventCenter.Instance.DispatchEvent<int>(EventConst.TEST_MESSAGE, 1);
+                //EventCenter.Instance.DispatchEvent<string>(EventConst.TEST_MESSAGE, "2");
             }
         }
     }

@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
 
-namespace JLXB.Framework
+namespace JLXB.Framework.Event
 {
-    public sealed class EventManager : Singleton<EventManager>
+    public sealed class EventCenter : Singleton<EventCenter>
     {
         private Dictionary<string, IEventData> m_EventTable;
 
-        public EventManager()
+        public EventCenter()
         {
             m_EventTable = new Dictionary<string, IEventData>();
         }
