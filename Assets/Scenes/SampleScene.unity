@@ -314,4 +314,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf850e10061555f459be837bd84c5a5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loopCount: 100000
+  loopCount: 100

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using JLXB.Framework.Event;
 
@@ -8,12 +7,12 @@ public class TestEvent : MonoBehaviour
 
     void Start()
     {
-        EventCenter.Instance.Register<int>(EventConst.TEST_MESSAGE, TestMessage1);
+        EventCenter.Register<int>(EventConst.TEST_MESSAGE, TestMessage1);
     }
 
     private void OnDestroy()
     {
-        EventCenter.Instance.Remove<int>(EventConst.TEST_MESSAGE, TestMessage1);
+        EventCenter.Remove<int>(EventConst.TEST_MESSAGE, TestMessage1);
     }
 
     void Update()
@@ -22,8 +21,8 @@ public class TestEvent : MonoBehaviour
         {
             for (int i = 0; i < loopCount; i++)
             {
-                EventCenter.Instance.DispatchEvent<int>(EventConst.TEST_MESSAGE, 1);
-                //EventCenter.Instance.DispatchEvent<string>(EventConst.TEST_MESSAGE, "2");
+                EventCenter.DispatchEvent<int>(EventConst.TEST_MESSAGE, 1);
+                //EventCenter.DispatchEvent<string>(EventConst.TEST_MESSAGE, "2");
             }
         }
     }

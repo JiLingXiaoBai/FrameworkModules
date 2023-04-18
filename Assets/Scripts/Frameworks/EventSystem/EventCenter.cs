@@ -4,16 +4,12 @@ using UnityEngine.Events;
 
 namespace JLXB.Framework.Event
 {
-    public sealed class EventCenter : Singleton<EventCenter>
+    public static class EventCenter
     {
-        private Dictionary<string, IEventData> m_EventTable;
+        private static Dictionary<string, IEventData> m_EventTable = new Dictionary<string, IEventData>();
 
-        public EventCenter()
-        {
-            m_EventTable = new Dictionary<string, IEventData>();
-        }
 
-        private void OnRegistering(string key, IEventData eventData)
+        private static void OnRegistering(string key, IEventData eventData)
         {
             if (!m_EventTable.ContainsKey(key))
             {
@@ -26,7 +22,7 @@ namespace JLXB.Framework.Event
             }
         }
 
-        private void OnRemoving(string key, IEventData eventData)
+        private static void OnRemoving(string key, IEventData eventData)
         {
             if (m_EventTable.ContainsKey(key))
             {
@@ -46,7 +42,7 @@ namespace JLXB.Framework.Event
             }
         }
 
-        private void OnRemoved(string key)
+        private static void OnRemoved(string key)
         {
             if (m_EventTable[key] == null)
             {
@@ -55,7 +51,7 @@ namespace JLXB.Framework.Event
         }
 
         //no parameters
-        public void Register(string key, UnityAction action)
+        public static void Register(string key, UnityAction action)
         {
             OnRegistering(key, new EventData(action));
 
@@ -70,7 +66,7 @@ namespace JLXB.Framework.Event
         }
 
         //single parameter
-        public void Register<T>(string key, UnityAction<T> action)
+        public static void Register<T>(string key, UnityAction<T> action)
         {
             OnRegistering(key, new EventData<T>(action));
 
@@ -85,7 +81,7 @@ namespace JLXB.Framework.Event
         }
 
         //two parameters
-        public void Register<T0, T1>(string key, UnityAction<T0, T1> action)
+        public static void Register<T0, T1>(string key, UnityAction<T0, T1> action)
         {
             OnRegistering(key, new EventData<T0, T1>(action));
 
@@ -100,7 +96,7 @@ namespace JLXB.Framework.Event
         }
 
         //three parameters
-        public void Register<T0, T1, T2>(string key, UnityAction<T0, T1, T2> action)
+        public static void Register<T0, T1, T2>(string key, UnityAction<T0, T1, T2> action)
         {
             OnRegistering(key, new EventData<T0, T1, T2>(action));
             if (m_EventTable[key] == null)
@@ -114,7 +110,7 @@ namespace JLXB.Framework.Event
         }
 
         //four parameters
-        public void Register<T0, T1, T2, T3>(string key, UnityAction<T0, T1, T2, T3> action)
+        public static void Register<T0, T1, T2, T3>(string key, UnityAction<T0, T1, T2, T3> action)
         {
             OnRegistering(key, new EventData<T0, T1, T2, T3>(action));
             if (m_EventTable[key] == null)
@@ -130,7 +126,7 @@ namespace JLXB.Framework.Event
 
 
         //no parameters
-        public void Remove(string key, UnityAction action)
+        public static void Remove(string key, UnityAction action)
         {
             OnRemoving(key, new EventData(action));
             (m_EventTable[key] as EventData).eventActions -= action;
@@ -138,7 +134,7 @@ namespace JLXB.Framework.Event
         }
 
         //single parameter
-        public void Remove<T>(string key, UnityAction<T> action)
+        public static void Remove<T>(string key, UnityAction<T> action)
         {
             OnRemoving(key, new EventData<T>(action));
             (m_EventTable[key] as EventData<T>).eventActions -= action;
@@ -146,7 +142,7 @@ namespace JLXB.Framework.Event
         }
 
         //two parameters
-        public void Remove<T0, T1>(string key, UnityAction<T0, T1> action)
+        public static void Remove<T0, T1>(string key, UnityAction<T0, T1> action)
         {
             OnRemoving(key, new EventData<T0, T1>(action));
             (m_EventTable[key] as EventData<T0, T1>).eventActions -= action;
@@ -154,7 +150,7 @@ namespace JLXB.Framework.Event
         }
 
         //three parameters
-        public void Remove<T0, T1, T2>(string key, UnityAction<T0, T1, T2> action)
+        public static void Remove<T0, T1, T2>(string key, UnityAction<T0, T1, T2> action)
         {
             OnRemoving(key, new EventData<T0, T1, T2>(action));
             (m_EventTable[key] as EventData<T0, T1, T2>).eventActions -= action;
@@ -162,21 +158,21 @@ namespace JLXB.Framework.Event
         }
 
         //four parameters
-        public void Remove<T0, T1, T2, T3>(string key, UnityAction<T0, T1, T2, T3> action)
+        public static void Remove<T0, T1, T2, T3>(string key, UnityAction<T0, T1, T2, T3> action)
         {
             OnRemoving(key, new EventData<T0, T1, T2, T3>(action));
             (m_EventTable[key] as EventData<T0, T1, T2, T3>).eventActions -= action;
             OnRemoved(key);
         }
 
-        public void Clear()
+        public static void Clear()
         {
             m_EventTable.Clear();
         }
 
 
         //no parameters
-        public void DispatchEvent(string key)
+        public static void DispatchEvent(string key)
         {
 
             if (m_EventTable.TryGetValue(key, out IEventData data))
@@ -193,7 +189,7 @@ namespace JLXB.Framework.Event
         }
 
         //single parameters
-        public void DispatchEvent<T>(string key, T arg)
+        public static void DispatchEvent<T>(string key, T arg)
         {
 
             if (m_EventTable.TryGetValue(key, out IEventData data))
@@ -210,7 +206,7 @@ namespace JLXB.Framework.Event
         }
 
         //two parameters
-        public void DispatchEvent<T0, T1>(string key, T0 arg0, T1 arg1)
+        public static void DispatchEvent<T0, T1>(string key, T0 arg0, T1 arg1)
         {
 
             if (m_EventTable.TryGetValue(key, out IEventData data))
@@ -228,7 +224,7 @@ namespace JLXB.Framework.Event
         }
 
         //three parameters
-        public void DispatchEvent<T0, T1, T2>(string key, T0 arg0, T1 arg1, T2 arg2)
+        public static void DispatchEvent<T0, T1, T2>(string key, T0 arg0, T1 arg1, T2 arg2)
         {
 
             if (m_EventTable.TryGetValue(key, out IEventData data))
@@ -245,7 +241,7 @@ namespace JLXB.Framework.Event
         }
 
         //four parameters
-        public void DispatchEvent<T0, T1, T2, T3>(string key, T0 arg0, T1 arg1, T2 arg2, T3 arg3)
+        public static void DispatchEvent<T0, T1, T2, T3>(string key, T0 arg0, T1 arg1, T2 arg2, T3 arg3)
         {
 
             if (m_EventTable.TryGetValue(key, out IEventData data))
