@@ -6,6 +6,54 @@ namespace JLXB.Framework.Event
 {
     public static class EventCenter
     {
+
+        private interface IEventData { }
+
+        private class EventData : IEventData
+        {
+            public UnityAction eventActions;
+            public EventData(UnityAction action)
+            {
+                eventActions += action;
+            }
+        }
+
+        private class EventData<T> : IEventData
+        {
+            public UnityAction<T> eventActions;
+            public EventData(UnityAction<T> action)
+            {
+                eventActions += action;
+            }
+        }
+
+        private class EventData<T0, T1> : IEventData
+        {
+            public UnityAction<T0, T1> eventActions;
+            public EventData(UnityAction<T0, T1> action)
+            {
+                eventActions += action;
+            }
+        }
+
+        private class EventData<T0, T1, T2> : IEventData
+        {
+            public UnityAction<T0, T1, T2> eventActions;
+            public EventData(UnityAction<T0, T1, T2> action)
+            {
+                eventActions += action;
+            }
+        }
+
+        private class EventData<T0, T1, T2, T3> : IEventData
+        {
+            public UnityAction<T0, T1, T2, T3> eventActions;
+            public EventData(UnityAction<T0, T1, T2, T3> action)
+            {
+                eventActions += action;
+            }
+        }
+
         private static Dictionary<string, IEventData> m_EventTable = new Dictionary<string, IEventData>();
 
 

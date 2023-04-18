@@ -17,7 +17,7 @@ public class TestEvent : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             for (int i = 0; i < loopCount; i++)
             {
