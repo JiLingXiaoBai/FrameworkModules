@@ -1,11 +1,11 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using System;
-using Object = UnityEngine.Object;
 
 //A fork from https://github.com/akbiggs/UnityTimer/blob/master/Source/Timer.cs
-//todo: Add a pool; use coroutine in manager without a monobehaviour
+//todo: Add a pool;
 
 /// Allows you to run events on a delay without the use of <see cref="Coroutine"/>s
 /// or <see cref="MonoBehaviour"/>s.
@@ -91,16 +91,7 @@ namespace JLXB.Framework.Timer
             // create a manager object to update all the timers if one does not already exist.
             if (Timer._manager == null)
             {
-                TimerManager managerInScene = Object.FindObjectOfType<TimerManager>();
-                if (managerInScene != null)
-                {
-                    Timer._manager = managerInScene;
-                }
-                else
-                {
-                    GameObject managerObject = new GameObject { name = "TimerManager" };
-                    Timer._manager = managerObject.AddComponent<TimerManager>();
-                }
+                Timer._manager = TimerManager.Instance;
             }
 
             Timer timer = new Timer(duration, onComplete, onUpdate, isLooped, useRealTime, autoDestroyOwner);
@@ -398,7 +389,7 @@ namespace JLXB.Framework.Timer
         /// This will be instantiated the first time you create a timer -- you do not need to add it into the
         /// scene manually.
         /// </summary>
-        private class TimerManager : MonoBehaviour
+        private class TimerManager : MonoSingleton<TimerManager>
         {
             private List<Timer> _timers = new List<Timer>();
 
@@ -437,26 +428,30 @@ namespace JLXB.Framework.Timer
                 }
             }
 
-            // update all the registered timers on every frame
-            private void Update()
+            private void Awake()
             {
-                this.UpdateAllTimers();
+                StartCoroutine(UpdateAllTimers());
             }
 
-            private void UpdateAllTimers()
+            // update all the registered timers on every frame
+            private IEnumerator UpdateAllTimers()
             {
-                if (this._timersToAdd.Count > 0)
+                while (true)
                 {
-                    this._timers.AddRange(this._timersToAdd);
-                    this._timersToAdd.Clear();
-                }
+                    if (this._timersToAdd.Count > 0)
+                    {
+                        this._timers.AddRange(this._timersToAdd);
+                        this._timersToAdd.Clear();
+                    }
 
-                foreach (Timer timer in this._timers)
-                {
-                    timer.Update();
-                }
+                    foreach (Timer timer in this._timers)
+                    {
+                        timer.Update();
+                    }
 
-                this._timers.RemoveAll(t => t.isDone);
+                    this._timers.RemoveAll(t => t.isDone);
+                    yield return null;
+                }
             }
         }
 
