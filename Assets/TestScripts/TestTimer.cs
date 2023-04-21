@@ -8,6 +8,10 @@ public class TestTimer : MonoBehaviour
     JTimer.Timer timer1;
     JTimer.Timer timer2;
     JTimer.Timer timer3;
+    JTimer.Timer timer4;
+
+    int count = 5;
+
     void Start()
     {
 
@@ -23,20 +27,30 @@ public class TestTimer : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.T))
         {
-            timer1 = JTimer.Timer.Register(1f, () => { ShowComplete("1"); });
-            timer2 = JTimer.Timer.Register(2f, () => { ShowComplete("2"); }, secondsElapsed => { ShowUpdate("2 + " + secondsElapsed); });
-            if (timer3 == null)
+            // timer1 = JTimer.Timer.Register(1f, () => { ShowComplete("1"); });
+            // timer2 = JTimer.Timer.Register(2f, () => { ShowComplete("2"); }, secondsElapsed => { ShowUpdate("2 + " + secondsElapsed); });
+            // if (timer3 == null)
+            // {
+            //     timer3 = JTimer.Timer.Register(1.5f, () => { ShowComplete("3"); }, isLooped: true);
+            // }
+            // else if (timer3.isPaused)
+            // {
+            //     timer3.Resume();
+            // }
+            // else
+            // {
+            //     timer3.Pause();
+            // }
+
+            timer4 = JTimer.Timer.Register(1.5f, () =>
             {
-                timer3 = JTimer.Timer.Register(1.5f, () => { ShowComplete("3"); }, isLooped: true);
-            }
-            else if (timer3.isPaused)
-            {
-                timer3.Resume();
-            }
-            else
-            {
-                timer3.Pause();
-            }
+                ShowComplete("4");
+                if (--count < 0)
+                {
+                    ShowComplete("4 DONE");
+                    timer4.Cancel();
+                }
+            }, isLooped: true);
         }
     }
 

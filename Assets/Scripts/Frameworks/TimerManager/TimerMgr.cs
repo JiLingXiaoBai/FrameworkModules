@@ -5,7 +5,6 @@ using UnityEngine.Events;
 using System;
 
 //A fork from https://github.com/akbiggs/UnityTimer/blob/master/Source/Timer.cs
-//todo: Add a pool;
 
 /// Allows you to run events on a delay without the use of <see cref="Coroutine"/>s
 /// or <see cref="MonoBehaviour"/>s.
@@ -65,6 +64,42 @@ namespace JLXB.Framework.Timer
 
         #endregion
 
+        #region Private Static Properties/Fields
+
+        // responsible for updating all registered timers
+        private static TimerMgr _manager;
+
+        #endregion
+
+        #region Private Properties/Fields
+
+        private bool isOwnerDestroyed
+        {
+            get { return this._hasAutoDestroyOwner && this._autoDestroyOwner == null; }
+        }
+
+        private readonly UnityAction _onComplete;
+        private readonly UnityAction<float> _onUpdate;
+        private float _startTime;
+        private float _lastUpdateTime;
+
+        // for pausing, we push the start time forward by the amount of time that has passed.
+        // this will mess with the amount of time that elapsed when we're cancelled or paused if we just
+        // check the start time versus the current world time, so we need to cache the time that was elapsed
+        // before we paused/cancelled
+        private float? _timeElapsedBeforeCancel;
+        private float? _timeElapsedBeforePause;
+
+        // after the auto destroy owner is destroyed, the timer will expire
+        // this way you don't run into any annoying bugs with timers running and accessing objects
+        // after they have been destroyed
+        private readonly MonoBehaviour _autoDestroyOwner;
+        private readonly bool _hasAutoDestroyOwner;
+
+        #endregion
+
+
+
         #region Public Static Methods
 
         /// <summary>
@@ -91,7 +126,7 @@ namespace JLXB.Framework.Timer
             // create a manager object to update all the timers if one does not already exist.
             if (Timer._manager == null)
             {
-                Timer._manager = TimerManager.Instance;
+                Timer._manager = TimerMgr.Instance;
             }
 
             Timer timer = new Timer(duration, onComplete, onUpdate, isLooped, useRealTime, autoDestroyOwner);
@@ -268,40 +303,6 @@ namespace JLXB.Framework.Timer
 
         #endregion
 
-        #region Private Static Properties/Fields
-
-        // responsible for updating all registered timers
-        private static TimerManager _manager;
-
-        #endregion
-
-        #region Private Properties/Fields
-
-        private bool isOwnerDestroyed
-        {
-            get { return this._hasAutoDestroyOwner && this._autoDestroyOwner == null; }
-        }
-
-        private readonly UnityAction _onComplete;
-        private readonly UnityAction<float> _onUpdate;
-        private float _startTime;
-        private float _lastUpdateTime;
-
-        // for pausing, we push the start time forward by the amount of time that has passed.
-        // this will mess with the amount of time that elapsed when we're cancelled or paused if we just
-        // check the start time versus the current world time, so we need to cache the time that was elapsed
-        // before we paused/cancelled
-        private float? _timeElapsedBeforeCancel;
-        private float? _timeElapsedBeforePause;
-
-        // after the auto destroy owner is destroyed, the timer will expire
-        // this way you don't run into any annoying bugs with timers running and accessing objects
-        // after they have been destroyed
-        private readonly MonoBehaviour _autoDestroyOwner;
-        private readonly bool _hasAutoDestroyOwner;
-
-        #endregion
-
         #region Private Constructor (use static Register method to create new timer)
 
         private Timer(float duration, UnityAction onComplete, UnityAction<float> onUpdate,
@@ -389,7 +390,7 @@ namespace JLXB.Framework.Timer
         /// This will be instantiated the first time you create a timer -- you do not need to add it into the
         /// scene manually.
         /// </summary>
-        private class TimerManager : MonoSingleton<TimerManager>
+        private class TimerMgr : MonoSingleton<TimerMgr>
         {
             private List<Timer> _timers = new List<Timer>();
 
