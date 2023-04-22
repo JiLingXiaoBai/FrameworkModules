@@ -79,7 +79,7 @@ namespace JLXB.Framework.Timer
         }
 
         private readonly UnityAction _onComplete;
-        private readonly UnityAction<float> _onUpdate;
+        private readonly UnityAction<float> _onFrameUpdate;
         private float _startTime;
         private float _lastUpdateTime;
 
@@ -110,7 +110,7 @@ namespace JLXB.Framework.Timer
         /// </summary>
         /// <param name="duration">The time to wait before the timer should fire, in seconds.</param>
         /// <param name="onComplete">An action to fire when the timer completes.</param>
-        /// <param name="onUpdate">An action that should fire each time the timer is updated. Takes the amount
+        /// <param name="onFrameUpdate">An action that should fire each time the timer is updated. Takes the amount
         /// of time passed in seconds since the start of the timer's current loop.</param>
         /// <param name="isLooped">Whether the timer should repeat after executing.</param>
         /// <param name="useRealTime">Whether the timer uses real-time(i.e. not affected by pauses,
@@ -120,7 +120,7 @@ namespace JLXB.Framework.Timer
         /// by preventing the timer from running and accessessing its parents' components
         /// after the parent has been destroyed.</param>
         /// <returns>A timer object that allows you to examine stats and stop/resume progress.</returns>
-        public static Timer Register(float duration, UnityAction onComplete, UnityAction<float> onUpdate = null,
+        public static Timer Register(float duration, UnityAction onComplete, UnityAction<float> onFrameUpdate = null,
             bool isLooped = false, bool useRealTime = false, MonoBehaviour autoDestroyOwner = null)
         {
             // create a manager object to update all the timers if one does not already exist.
@@ -129,7 +129,7 @@ namespace JLXB.Framework.Timer
                 Timer._manager = TimerMgr.Instance;
             }
 
-            Timer timer = new Timer(duration, onComplete, onUpdate, isLooped, useRealTime, autoDestroyOwner);
+            Timer timer = new Timer(duration, onComplete, onFrameUpdate, isLooped, useRealTime, autoDestroyOwner);
             Timer._manager.RegisterTimer(timer);
             return timer;
         }
@@ -305,12 +305,12 @@ namespace JLXB.Framework.Timer
 
         #region Private Constructor (use static Register method to create new timer)
 
-        private Timer(float duration, UnityAction onComplete, UnityAction<float> onUpdate,
+        private Timer(float duration, UnityAction onComplete, UnityAction<float> onFrameUpdate,
             bool isLooped, bool usesRealTime, MonoBehaviour autoDestroyOwner)
         {
             this.duration = duration;
             this._onComplete = onComplete;
-            this._onUpdate = onUpdate;
+            this._onFrameUpdate = onFrameUpdate;
 
             this.isLooped = isLooped;
             this.usesRealTime = usesRealTime;
@@ -357,9 +357,9 @@ namespace JLXB.Framework.Timer
 
             this._lastUpdateTime = this.GetWorldTime();
 
-            if (this._onUpdate != null)
+            if (this._onFrameUpdate != null)
             {
-                this._onUpdate(this.GetTimeElapsed());
+                this._onFrameUpdate(this.GetTimeElapsed());
             }
 
             if (this.GetWorldTime() >= this.GetFireTime())
