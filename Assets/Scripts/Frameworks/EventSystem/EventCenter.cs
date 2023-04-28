@@ -27,33 +27,6 @@ namespace JLXB.Framework.Event
             }
         }
 
-        private class EventData<T0, T1> : IEventData
-        {
-            public UnityAction<T0, T1> eventActions;
-            public EventData(UnityAction<T0, T1> action)
-            {
-                eventActions += action;
-            }
-        }
-
-        private class EventData<T0, T1, T2> : IEventData
-        {
-            public UnityAction<T0, T1, T2> eventActions;
-            public EventData(UnityAction<T0, T1, T2> action)
-            {
-                eventActions += action;
-            }
-        }
-
-        private class EventData<T0, T1, T2, T3> : IEventData
-        {
-            public UnityAction<T0, T1, T2, T3> eventActions;
-            public EventData(UnityAction<T0, T1, T2, T3> action)
-            {
-                eventActions += action;
-            }
-        }
-
         private static Dictionary<string, IEventData> m_EventTable = new Dictionary<string, IEventData>();
 
 
@@ -128,48 +101,6 @@ namespace JLXB.Framework.Event
             }
         }
 
-        //two parameters
-        public static void Register<T0, T1>(string key, UnityAction<T0, T1> action)
-        {
-            OnRegistering(key, new EventData<T0, T1>(action));
-
-            if (m_EventTable[key] == null)
-            {
-                m_EventTable[key] = new EventData<T0, T1>(action);
-            }
-            else
-            {
-                (m_EventTable[key] as EventData<T0, T1>).eventActions += action;
-            }
-        }
-
-        //three parameters
-        public static void Register<T0, T1, T2>(string key, UnityAction<T0, T1, T2> action)
-        {
-            OnRegistering(key, new EventData<T0, T1, T2>(action));
-            if (m_EventTable[key] == null)
-            {
-                m_EventTable[key] = new EventData<T0, T1, T2>(action);
-            }
-            else
-            {
-                (m_EventTable[key] as EventData<T0, T1, T2>).eventActions += action;
-            }
-        }
-
-        //four parameters
-        public static void Register<T0, T1, T2, T3>(string key, UnityAction<T0, T1, T2, T3> action)
-        {
-            OnRegistering(key, new EventData<T0, T1, T2, T3>(action));
-            if (m_EventTable[key] == null)
-            {
-                m_EventTable[key] = new EventData<T0, T1, T2, T3>(action);
-            }
-            else
-            {
-                (m_EventTable[key] as EventData<T0, T1, T2, T3>).eventActions += action;
-            }
-        }
 
 
 
@@ -186,30 +117,6 @@ namespace JLXB.Framework.Event
         {
             OnRemoving(key, new EventData<T>(action));
             (m_EventTable[key] as EventData<T>).eventActions -= action;
-            OnRemoved(key);
-        }
-
-        //two parameters
-        public static void Remove<T0, T1>(string key, UnityAction<T0, T1> action)
-        {
-            OnRemoving(key, new EventData<T0, T1>(action));
-            (m_EventTable[key] as EventData<T0, T1>).eventActions -= action;
-            OnRemoved(key);
-        }
-
-        //three parameters
-        public static void Remove<T0, T1, T2>(string key, UnityAction<T0, T1, T2> action)
-        {
-            OnRemoving(key, new EventData<T0, T1, T2>(action));
-            (m_EventTable[key] as EventData<T0, T1, T2>).eventActions -= action;
-            OnRemoved(key);
-        }
-
-        //four parameters
-        public static void Remove<T0, T1, T2, T3>(string key, UnityAction<T0, T1, T2, T3> action)
-        {
-            OnRemoving(key, new EventData<T0, T1, T2, T3>(action));
-            (m_EventTable[key] as EventData<T0, T1, T2, T3>).eventActions -= action;
             OnRemoved(key);
         }
 
@@ -245,58 +152,6 @@ namespace JLXB.Framework.Event
                 if (data is EventData<T> eventData)
                 {
                     eventData.eventActions.Invoke(arg);
-                }
-                else
-                {
-                    throw new Exception(string.Format("广播事件错误：事件 {0} 对应委托具有不同的类型", key));
-                }
-            }
-        }
-
-        //two parameters
-        public static void DispatchEvent<T0, T1>(string key, T0 arg0, T1 arg1)
-        {
-
-            if (m_EventTable.TryGetValue(key, out IEventData data))
-            {
-
-                if (data is EventData<T0, T1> eventData)
-                {
-                    eventData.eventActions.Invoke(arg0, arg1);
-                }
-                else
-                {
-                    throw new Exception(string.Format("广播事件错误：事件 {0} 对应委托具有不同的类型", key));
-                }
-            }
-        }
-
-        //three parameters
-        public static void DispatchEvent<T0, T1, T2>(string key, T0 arg0, T1 arg1, T2 arg2)
-        {
-
-            if (m_EventTable.TryGetValue(key, out IEventData data))
-            {
-                if (data is EventData<T0, T1, T2> eventData)
-                {
-                    eventData.eventActions.Invoke(arg0, arg1, arg2);
-                }
-                else
-                {
-                    throw new Exception(string.Format("广播事件错误：事件 {0} 对应委托具有不同的类型", key));
-                }
-            }
-        }
-
-        //four parameters
-        public static void DispatchEvent<T0, T1, T2, T3>(string key, T0 arg0, T1 arg1, T2 arg2, T3 arg3)
-        {
-
-            if (m_EventTable.TryGetValue(key, out IEventData data))
-            {
-                if (data is EventData<T0, T1, T2, T3> eventData)
-                {
-                    eventData.eventActions.Invoke(arg0, arg1, arg2, arg3);
                 }
                 else
                 {
