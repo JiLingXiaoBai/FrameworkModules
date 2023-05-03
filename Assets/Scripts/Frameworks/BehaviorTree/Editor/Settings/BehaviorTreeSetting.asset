@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3e739fde34e7cb4096c83cb03477a64, type: 3}
+  m_Name: BehaviorTreeSetting
+  m_EditorClassIdentifier: 
+  settings:
+  - EditorName: BehaviorTree
+    ShowGroups: []
+    NotShowGroups:
+    - Skill
+    - Dialogue
+    - Option
+    - Piece
+    graphStyleSheet: {fileID: 7433441132597879392, guid: 5f79c830f4535c14f890947c26d3c15e, type: 3}
+    inspectorStyleSheet: {fileID: 7433441132597879392, guid: 6a417609ee1662f4788f3e43605a507a, type: 3}
+    nodeStyleSheet: {fileID: 7433441132597879392, guid: 57ba9ca2734f6514197fe65e36de1022, type: 3}
+    infoStyleSheet: {fileID: 7433441132597879392, guid: 3cce85431c5e1ea40bf6fe82eca7b554, type: 3}

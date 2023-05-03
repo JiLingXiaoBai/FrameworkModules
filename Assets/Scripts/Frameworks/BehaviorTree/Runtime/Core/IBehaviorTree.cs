@@ -33,7 +33,7 @@ namespace JLXB.Framework.BehaviorTree
         /// <summary>
         /// Editor Only
         /// </summary>
-        // public BehaviorTreeSO ExternalBehaviorTree { get; }
+        public BehaviorTreeSO ExternalBehaviorTree { get; }
         /// <summary>
         /// Editor Only
         /// </summary>

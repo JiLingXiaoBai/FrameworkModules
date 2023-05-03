@@ -1,18 +1,65 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Root : MonoBehaviour
+namespace JLXB.Framework.BehaviorTree
 {
-    // Start is called before the first frame update
-    void Start()
+    /// <summary>
+    /// 根结点行为
+    /// </summary>
+    [EditorInfo("Root:根节点,你不能删除它")]
+    public class Root : NodeBehavior
     {
-        
-    }
+        [SerializeReference]
+        private NodeBehavior child;
+#if UNITY_EDITOR
+        [HideInEditorWindow]
+        public System.Action UpdateEditor;
+#endif
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public NodeBehavior Child
+        {
+            get => child;
+#if UNITY_EDITOR
+            set => child = value;
+#endif
+        }
+
+        protected sealed override void OnRun()
+        {
+            child?.Run(gameObject, tree);
+        }
+
+        public override void Awake()
+        {
+            child?.Awake();
+        }
+
+        public override void Start()
+        {
+            child?.Start();
+        }
+
+        public override void PreUpdate()
+        {
+            child?.PreUpdate();
+        }
+
+        protected sealed override Status OnUpdate()
+        {
+#if UNITY_EDITOR
+            UpdateEditor?.Invoke();
+#endif
+            if (child == null) return Status.Failure;
+            return child.Update();
+        }
+
+        public override void PostUpdate()
+        {
+            child?.PostUpdate();
+        }
+
+        public override void Abort()
+        {
+            child?.Abort();
+        }
     }
 }

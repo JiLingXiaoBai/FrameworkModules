@@ -42,7 +42,7 @@ namespace JLXB.Framework.BehaviorTree
     public abstract class SharedVariable<T> : SharedVariable
     {
         [SerializeField]
-        private T value;
+        protected T value;
 
         public T Value
         {
