@@ -1,6 +1,6 @@
 namespace JLXB.Framework.BehaviorTree.Editor
 {
-    public sealed class ConditionalSearchWindowProvider : CertainNodeSearchWindowProvider<Condition>
+    public sealed class ConditionSearchWindowProvider : CertainNodeSearchWindowProvider<Condition>
     {
 
     }

@@ -18,7 +18,7 @@ namespace JLXB.Framework.BehaviorTree.Editor
         {
             evt.menu.MenuItems().Add(new BehaviorTreeDropdownMenuAction("Change Behavior", (a) =>
             {
-                var provider = ScriptableObject.CreateInstance<ConditionalSearchWindowProvider>();
+                var provider = ScriptableObject.CreateInstance<ConditionSearchWindowProvider>();
                 provider.Init(this, BehaviorTreeSetting.GetMask(mapTreeView.treeEditorName));
                 SearchWindow.Open(new SearchWindowContext(a.eventInfo.localMousePosition), provider);
             }));

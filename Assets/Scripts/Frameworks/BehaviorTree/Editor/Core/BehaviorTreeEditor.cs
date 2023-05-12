@@ -8,7 +8,6 @@ namespace JLXB.Framework.BehaviorTree.Editor
     [CustomEditor(typeof(BehaviorTree))]
     public class BehaviorTreeEditor : UnityEditor.Editor
     {
-        const string LabelText = "AkiBT 行为树 Version1.2.6";
         const string ButtonText = "打开行为树";
         protected VisualElement myInspector;
         private FieldResolverFactory factory = FieldResolverFactory.Instance;
@@ -16,9 +15,6 @@ namespace JLXB.Framework.BehaviorTree.Editor
         {
             myInspector = new VisualElement();
             var bt = target as IBehaviorTree;
-            var label = new Label(LabelText);
-            label.style.fontSize = 20;
-            myInspector.Add(label);
             myInspector.styleSheets.Add(BehaviorTreeSetting.GetInspectorStyle("BehaviorTree"));
             var toggle = new PropertyField(serializedObject.FindProperty("updateType"), "更新模式");
             myInspector.Add(toggle);
@@ -44,7 +40,6 @@ namespace JLXB.Framework.BehaviorTree.Editor
     [CustomEditor(typeof(BehaviorTreeSO))]
     public class BehaviorTreeSOEditor : UnityEditor.Editor
     {
-        const string LabelText = "AkiBT 行为树SO Version1.2.6";
         const string ButtonText = "打开行为树SO";
         protected VisualElement myInspector;
         private FieldResolverFactory factory = new FieldResolverFactory();
@@ -52,9 +47,6 @@ namespace JLXB.Framework.BehaviorTree.Editor
         {
             myInspector = new VisualElement();
             var bt = target as IBehaviorTree;
-            var label = new Label(LabelText);
-            label.style.fontSize = 20;
-            myInspector.Add(label);
             myInspector.styleSheets.Add(BehaviorTreeSetting.GetInspectorStyle("BehaviorTree"));
             myInspector.Add(new Label("行为树描述"));
             var description = new PropertyField(serializedObject.FindProperty("Description"), string.Empty);

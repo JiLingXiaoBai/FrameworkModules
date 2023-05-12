@@ -21,7 +21,7 @@ namespace JLXB.Framework.BehaviorTree.Editor
         /// <returns></returns>
         protected virtual Type SOType => typeof(BehaviorTreeSO);
         protected virtual string TreeName => "行为树";
-        protected virtual string InfoText => "欢迎使用AkiBT,一个超简单的行为树!";
+        protected virtual string InfoText => "单击右键新建结点";
         [MenuItem("Tools/BehaviorTree Editor")]
         private static void ShowEditorWindow()
         {
