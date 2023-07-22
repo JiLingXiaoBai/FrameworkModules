@@ -1,5 +1,5 @@
 
-namespace FSM
+namespace JLXB.Framework.FSM
 {
     /// <summary>
     /// The base class of all transitions
