@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using System;
 
 //A fork from https://github.com/akbiggs/UnityTimer/blob/master/Source/Timer.cs
-
+/// <summary>
 /// Allows you to run events on a delay without the use of <see cref="Coroutine"/>s
 /// or <see cref="MonoBehaviour"/>s.
 ///
