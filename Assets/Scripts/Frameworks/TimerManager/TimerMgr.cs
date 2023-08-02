@@ -390,7 +390,7 @@ namespace JLXB.Framework.Timer
         /// This will be instantiated the first time you create a timer -- you do not need to add it into the
         /// scene manually.
         /// </summary>
-        private class TimerMgr : MonoSingleton<TimerMgr>
+        private class TimerMgr : Singleton<TimerMgr>
         {
             private List<Timer> _timers = new List<Timer>();
 
@@ -429,9 +429,9 @@ namespace JLXB.Framework.Timer
                 }
             }
 
-            private void Awake()
+            public TimerMgr()
             {
-                StartCoroutine(UpdateAllTimers());
+                MonoMgr.Instance.StartCoroutine(UpdateAllTimers());
             }
 
             // update all the registered timers on every frame
