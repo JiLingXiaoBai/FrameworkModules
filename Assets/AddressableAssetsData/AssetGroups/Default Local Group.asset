@@ -20,7 +20,14 @@ MonoBehaviour:
   - m_GUID: fefd70b55937e2d49839555959b58d81
     m_Address: TestAssetCube
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - Test
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4db422ca305c6644938ba73b9170cb8
+    m_Address: TestAssetSphere
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Test
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 9f011467b70623a4a8352d340d13a49a, type: 2}

@@ -17,15 +17,24 @@ public class TestAsset : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.A))
         {
-            AssetMgr.Instance.LoadAssetAsync<GameObject>("TestAssetCube", (obj) =>
+            // AssetMgr.Instance.LoadAssetAsync<GameObject>("TestAssetCube", (obj) =>
+            // {
+            //     GameObject _testCube = GameObject.Instantiate(obj, Vector3.zero, Quaternion.identity);
+            //     _testCube.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            //     TimerUtils.TimerOnce(3, () =>
+            //     {
+            //         AssetMgr.Instance.ReleaseAsset(ref obj);
+            //     });
+            // }, false);
+
+            AssetMgr.Instance.InstantiateAsync("TestAssetCube", (obj) =>
             {
-                GameObject _testCube = GameObject.Instantiate(obj, Vector3.zero, Quaternion.identity);
-                _testCube.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                 TimerUtils.TimerOnce(3, () =>
                 {
-                    AssetMgr.Instance.ReleaseAsset(ref obj);
+                    AssetMgr.Instance.ReleaseInstance(ref obj);
                 });
-            }, false);
+            });
+
         }
     }
 }
