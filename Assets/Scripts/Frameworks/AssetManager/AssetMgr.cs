@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections;
 using System;
 using UnityEngine;
@@ -11,77 +12,150 @@ namespace JLXB.Framework.Asset
 {
     public class AssetMgr : Singleton<AssetMgr>
     {
+
+        private Dictionary<string, AsyncOperationHandle> _caches = new Dictionary<string, AsyncOperationHandle>();
+
         public void LoadAssetAsync<T>(string key, UnityAction<T> callback, bool autoRelease = true) where T : UnityEngine.Object
         {
-            var handle = Addressables.LoadAssetAsync<T>(key);
-            handle.Completed += (handle) =>
+            if (_caches.ContainsKey(key))
             {
-                if (handle.Status == AsyncOperationStatus.Succeeded)
+                var handle = _caches[key];
+                if (handle.IsDone)
                 {
-                    callback?.Invoke(handle.Result);
+                    callback?.Invoke(_caches[key].Convert<T>().Result);
                 }
-
-                if (autoRelease)
+                else
                 {
-                    Addressables.Release(handle);
+                    handle.Completed += (handle) =>
+                    {
+                        if (handle.Status == AsyncOperationStatus.Succeeded)
+                        {
+                            callback?.Invoke(_caches[key].Convert<T>().Result);
+                            if (autoRelease)
+                                ReleaseAsset(key);
+                        }
+                        else
+                        {
+                            throw new Exception(string.Format("加载资源失败 key = {0}", key));
+                        }
+                    };
                 }
-            };
-        }
-
-        public void LoadAssetsByLabel<T>(string label, Action<T> callback = null) where T : UnityEngine.Object
-        {
-            Addressables.LoadAssetsAsync<T>(label, callback).Completed += (handle) =>
+            }
+            else
             {
-                Addressables.Release(handle);
-            };
+                var handle = Addressables.LoadAssetAsync<T>(key);
+                handle.Completed += (handle) =>
+                {
+                    if (handle.Status == AsyncOperationStatus.Succeeded)
+                    {
+                        callback?.Invoke(handle.Result);
+                        if (autoRelease)
+                            ReleaseAsset(key);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("加载资源失败 key = {0}", key));
+                    }
+
+                };
+                _caches.Add(key, handle);
+            }
         }
 
-        /// <summary>
-        /// If autoRelease is false, use this to release asset manually
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public void ReleaseAsset<T>(ref T obj) where T : class
+        public void LoadAssetsByLabel<T>(string label, Action<T> callback, bool autoRelease = true) where T : UnityEngine.Object
         {
-            if (obj != null)
-                Addressables.Release(obj);
+            if (_caches.ContainsKey(label))
+            {
+                var handle = _caches[label];
+                if (handle.IsDone)
+                {
+                    IList<T> list = _caches[label].Convert<IList<T>>().Result;
+                    foreach (var item in list)
+                    {
+                        callback?.Invoke(item);
+                    }
+                }
+                else
+                {
+                    handle.Completed += (handle) =>
+                    {
+                        if (handle.Status == AsyncOperationStatus.Succeeded)
+                        {
+                            callback?.Invoke(_caches[label].Convert<T>().Result);
+                            if (autoRelease)
+                                ReleaseAsset(label);
+                        }
+                        else
+                        {
+                            throw new Exception(string.Format("加载资源失败 label = {0}", label));
+                        }
+                    };
+                }
+            }
+            else
+            {
+                var handle = Addressables.LoadAssetsAsync<T>(label, callback);
+                handle.Completed += (handle) =>
+                {
+                    if (handle.Status == AsyncOperationStatus.Succeeded)
+                    {
+                        if (autoRelease)
+                            ReleaseAsset(label);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("加载资源失败 label = {0}", label));
+                    }
+
+                };
+                _caches.Add(label, handle);
+            }
         }
 
-        public void LoadSceneAsync(string sceneName, LoadSceneMode loadMode, UnityAction loadAction = null, UnityAction finishAction = null, bool autoRelease = true)
+        public void ReleaseAsset(string key)
         {
-            var coroutine = WaitForLoading(sceneName, loadMode, loadAction, finishAction, autoRelease);
+            if (_caches.ContainsKey(key))
+            {
+                Addressables.Release(_caches[key]);
+                _caches.Remove(key);
+            }
+        }
+
+        public void LoadSceneAsync(string sceneName, LoadSceneMode loadMode, bool activateOnLoad, UnityAction<float> loadAction = null, UnityAction<SceneInstance> finishAction = null)
+        {
+            var coroutine = WaitForLoading(sceneName, loadMode, activateOnLoad, loadAction, finishAction);
             MonoMgr.Instance.StartCoroutine(coroutine);
         }
 
-        private IEnumerator WaitForLoading(string sceneName, LoadSceneMode loadMode, UnityAction loadAction, UnityAction finishAction, bool autoRelease)
+        private IEnumerator WaitForLoading(string sceneName, LoadSceneMode loadMode, bool activateOnLoad, UnityAction<float> loadAction, UnityAction<SceneInstance> finishAction)
         {
-            var handle = Addressables.LoadSceneAsync(sceneName, loadMode);
+            var handle = Addressables.LoadSceneAsync(sceneName, loadMode, activateOnLoad);
+            _caches.Add(sceneName, handle);
 
             while (handle.Status == AsyncOperationStatus.None)
             {
                 //进度条显示等等
-                loadAction?.Invoke();
+                loadAction?.Invoke(handle.PercentComplete);
                 yield return null;
             }
-
             if (handle.Status == AsyncOperationStatus.Succeeded)
             {
-                finishAction?.Invoke();
+                finishAction?.Invoke(handle.Result);
             }
-
-            if (autoRelease)
+            else
             {
-                Addressables.UnloadSceneAsync(handle);
+                throw new Exception(string.Format("加载场景失败，sceneName = {0}", sceneName));
             }
-
-            yield return null;
+            yield break;
         }
 
-        /// <summary>
-        /// If autoRelease is false, use this to release scene manually
-        /// </summary>
-        public void UnloadSceneAsync(SceneInstance scene)
+        public void UnloadSceneAsync(string sceneName)
         {
-            Addressables.UnloadSceneAsync(scene);
+            if (_caches.ContainsKey(sceneName))
+            {
+                Addressables.UnloadSceneAsync(_caches[sceneName]);
+                _caches.Remove(sceneName);
+            }
         }
 
         public void InstantiateAsync(string key, UnityAction<GameObject> callback = null)
