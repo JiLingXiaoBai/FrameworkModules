@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class TestAsset : MonoBehaviour
 {
     public Button Btn_ChangeScene;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,7 +58,8 @@ public class TestAsset : MonoBehaviour
             //     });
 
             AssetMgr.Instance.LoadAssetsByLabel<GameObject>("Test",
-            (item) => { GameObject _test = GameObject.Instantiate(item, Vector3.zero, Quaternion.identity); });
+                (item) => { GameObject _test = GameObject.Instantiate(item, Vector3.zero, Quaternion.identity); }
+            );
 
         }
     }

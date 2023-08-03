@@ -44,13 +44,11 @@ public class TestEvent : MonoBehaviour
 
     void TestMessage1(int data)
     {
-        int i = data + 1;
         Debug.Log("int TestMessage data: " + data);
     }
 
     void TestMessage2(string data)
     {
-
         Debug.Log("string TestMessage data: " + data);
     }
 }
