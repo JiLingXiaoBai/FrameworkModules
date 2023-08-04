@@ -6,7 +6,7 @@ namespace JLXB.Framework.LogSystem
         private ConsoleAppender() { }
         public void Log(LogData data)
         {
-            string str = String.Format("{0}\n[{1,-5}] {2}\n", data.logMessage, data.logLevel, data.logBasicData);
+            string str = string.Format("{0}\n[{1,-5}] {2}\n", data.logMessage, data.logLevel, data.logBasicData);
             switch (data.logLevel)
             {
                 case LogLevel.DEBUG:
@@ -17,8 +17,6 @@ namespace JLXB.Framework.LogSystem
                     UnityEngine.Debug.LogWarning(str);
                     break;
                 case LogLevel.ERROR:
-                    UnityEngine.Debug.LogError(str);
-                    break;
                 case LogLevel.FATAL:
                     UnityEngine.Debug.LogError(str);
                     break;

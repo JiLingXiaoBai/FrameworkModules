@@ -2,12 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Unity.VisualScripting;
-using UnityEngine;
 namespace JLXB.Framework.LogSystem
 {
-    public delegate void LogCall(string logLevel, string message);
-
     public enum LogLevel
     {
         ALL,   // 最低等级的，用于打开所有日志记录；
@@ -40,43 +36,38 @@ namespace JLXB.Framework.LogSystem
         Console,       // 控制台输出
     }
 
-    public class Logging : Singleton<Logging>
+    public class LogSystem : Singleton<LogSystem>
     {
-        private List<ILogAppender> appenders = new();
+        private readonly Dictionary<AppenderType, ILogAppender> _allAppenders = new();
 
-        private List<LogLevel> ignoreLevel = new();
+        private readonly List<LogLevel> _ignoreLevel = new();
 
         public bool EnableLog { get; set; }
 
-        public LogLevel logLevel { get; set; }
+        public LogLevel LogLevel { get; set; }
 
         private bool isInitConfig = false;
 
-        private Logging()
-        {
-
-        }
+        private LogSystem() { }
 
         private StackTrace StackTrace
         {
             get { return new StackTrace(3, true); }
         }
 
-        public void LoadAppenders(ILogAppender appender)
+        public void LoadAppenders(AppenderType appenderType, ILogAppender appender)
         {
-            if (appenders.Contains(appender)) return;
+            if (_allAppenders.ContainsKey(appenderType)) return;
 
-            appenders.Add(appender);
+            _allAppenders.Add(appenderType, appender);
         }
 
-        public void UnloadAppenders(ILogAppender appender)
+        public void UnLoadAppenders(AppenderType appenderType)
         {
-            if (!appenders.Contains(appender)) return;
+            if (!_allAppenders.ContainsKey(appenderType)) return;
 
-            appenders.Remove(appender);
+            _allAppenders.Remove(appenderType);
         }
-
-        public void SetLogCall(LogCall logCall) { }
 
         /// <summary>
         /// For these added level, the log does not do output.(Except for error output)
@@ -84,24 +75,24 @@ namespace JLXB.Framework.LogSystem
         /// <param name="level"></param>
         public void IgnoreLevel(LogLevel level)
         {
-            if (!ignoreLevel.Contains(level))
-                ignoreLevel.Add(level);
+            if (!_ignoreLevel.Contains(level))
+                _ignoreLevel.Add(level);
         }
         public void UnIgnoreLevel(LogLevel level)
         {
-            if (ignoreLevel.Contains(level))
-                ignoreLevel.Remove(level);
+            if (_ignoreLevel.Contains(level))
+                _ignoreLevel.Remove(level);
         }
 
         private bool IsOutputLog(LogLevel level)
         {
-            if (!EnableLog || (int)logLevel > (int)level || ignoreLevel.Contains(level)) return false;
+            if (!EnableLog || (int)LogLevel > (int)level || _ignoreLevel.Contains(level)) return false;
             return true;
         }
 
         private string GetParameters(System.Reflection.MethodBase methodBase)
         {
-            StringBuilder builder = new StringBuilder(1);
+            StringBuilder builder = new(1);
             foreach (var item in methodBase.GetParameters())
             {
                 builder.Append(item.ParameterType.Name);
@@ -111,7 +102,7 @@ namespace JLXB.Framework.LogSystem
 
         private string GetRelativePath(string path)
         {
-            path = path.Substring(path.IndexOf("Assets"));
+            path = path[path.IndexOf("Assets")..];
             path = path.Replace('\\', '/');
             return path;
         }
@@ -128,7 +119,7 @@ namespace JLXB.Framework.LogSystem
 
         private string TrackFormatting(StackTrace stackTrace)
         {
-            StringBuilder builder = new StringBuilder(120);
+            StringBuilder builder = new(120);
             foreach (var item in stackTrace.GetFrames())
             {
                 builder.Append(string.Format(GetBriefnessTrack(item))).Append("\r\n");
@@ -138,7 +129,7 @@ namespace JLXB.Framework.LogSystem
 
         private string GetExceptionTrack(Exception e)
         {
-            StringBuilder builder = new StringBuilder(120);
+            StringBuilder builder = new(120);
             builder.Append("Error:" + e.Message).Append("\r\n");
             if (!string.IsNullOrEmpty(e.StackTrace))
             {
@@ -147,7 +138,7 @@ namespace JLXB.Framework.LogSystem
             return builder.ToString();
         }
 
-        private void LogRecord(LogLevel level, object message, string track = "")
+        private void LogRecord(LogLevel level, object message, string track = "", bool receivedHandle = false)
         {
             if (!isInitConfig)
             {
@@ -155,17 +146,26 @@ namespace JLXB.Framework.LogSystem
                 isInitConfig = true;
             }
             if (!IsOutputLog(level)) return;
-            LogData data = new LogData();
-            data.logTime = DateTime.Now;
-            data.logLevel = level;
-            data.logMessage = message;
-            data.logBasicData = GetBriefnessTrack(StackTrace.GetFrame(1));
-            data.logTrack = track;
-
-            for (int i = 0; i < appenders.Count; i++)
+            LogData data = new()
             {
-                appenders[i].Log(data);
+                logTime = DateTime.Now,
+                logLevel = level,
+                logMessage = message,
+                logBasicData = GetBriefnessTrack(StackTrace.GetFrame(1)),
+                logTrack = track
+            };
+
+            foreach (var appender in _allAppenders)
+            {
+                if (receivedHandle == (appender.Key == AppenderType.Console))
+                    continue;
+                appender.Value.Log(data);
             }
+        }
+
+        public void HandleLog(LogLevel level, object message, string track)
+        {
+            LogRecord(level, message, track, true);
         }
 
         public void Debug(object message)
@@ -187,7 +187,7 @@ namespace JLXB.Framework.LogSystem
 
         public void Info(object message)
         {
-            LogRecord(LogLevel.INFO, message);
+            LogRecord(LogLevel.INFO, message, TrackFormatting(StackTrace));
         }
         public void Info(string format, params object[] args)
         {
@@ -252,7 +252,6 @@ namespace JLXB.Framework.LogSystem
         {
             LogRecord(LogLevel.FATAL, message, GetExceptionTrack(e));
         }
-
     }
 
 

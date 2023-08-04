@@ -15,7 +15,7 @@ namespace JLXB.Framework.LogSystem
             isInit = true;
 
             Log.EnableLog(true);
-            Log.LogLevel(LogLevel.ALL);
+            Log.SetLogLevel(LogLevel.ALL);
             Log.LoadAppenders(AppenderType.Console);
             Log.RegisterLogMessage();
             MonoMgr.Instance.AddDestroyListener(Log.UnRegisterLogMessage);

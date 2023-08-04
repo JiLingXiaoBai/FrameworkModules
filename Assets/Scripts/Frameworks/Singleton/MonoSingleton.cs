@@ -17,7 +17,7 @@ namespace JLXB.Framework
                     _instance = FindObjectOfType<T>();
                     if (_instance == null)
                     {
-                        GameObject obj = new GameObject(typeof(T).Name);
+                        GameObject obj = new(typeof(T).Name);
                         _instance = obj.AddComponent<T>();
                         DontDestroyOnLoad(obj);
                     }
@@ -32,8 +32,7 @@ namespace JLXB.Framework
             var ctors = typeof(T).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             if (ctors.Count() != 1)
                 throw new InvalidOperationException(String.Format("Type {0} must have exactly one constructor.", typeof(T)));
-            var ctor = ctors.SingleOrDefault(c => !c.GetParameters().Any() && c.IsPrivate);
-            if (ctor == null)
+            var ctor = ctors.SingleOrDefault(c => !c.GetParameters().Any() && c.IsPrivate) ??
                 throw new InvalidOperationException(String.Format("The constructor for {0} must be private and take no parameters.", typeof(T)));
         }
     }

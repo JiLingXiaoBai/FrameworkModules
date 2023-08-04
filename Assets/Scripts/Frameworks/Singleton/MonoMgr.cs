@@ -7,8 +7,8 @@ namespace JLXB.Framework
 {
     public class MonoMgr : MonoSingleton<MonoMgr>
     {
-        private event UnityAction _updateEvent;
-        private event UnityAction _destroyEvent;
+        private event UnityAction UpdateEvent;
+        private event UnityAction DestroyEvent;
         private MonoBehaviour _mono;
         private MonoMgr() { }
         private void Awake()
@@ -18,39 +18,36 @@ namespace JLXB.Framework
 
         void Update()
         {
-            if (_updateEvent != null)
+            if (UpdateEvent != null)
             {
-                _updateEvent();
+                UpdateEvent?.Invoke();
             }
         }
 
         void OnDestroy()
         {
-            if (_destroyEvent != null)
-            {
-                _destroyEvent();
-            }
-            _destroyEvent = null;
-            _updateEvent = null;
+            DestroyEvent?.Invoke();
+            DestroyEvent = null;
+            UpdateEvent = null;
         }
 
         public void AddUpdateListener(UnityAction func)
         {
-            _updateEvent += func;
+            UpdateEvent += func;
         }
         public void RemoveUpdateListener(UnityAction func)
         {
-            _updateEvent -= func;
+            UpdateEvent -= func;
         }
 
         public void AddDestroyListener(UnityAction func)
         {
-            _destroyEvent += func;
+            DestroyEvent += func;
         }
 
         public void RemoveDestroyListener(UnityAction func)
         {
-            _destroyEvent -= func;
+            DestroyEvent -= func;
         }
 
         public new Coroutine StartCoroutine(IEnumerator routine)

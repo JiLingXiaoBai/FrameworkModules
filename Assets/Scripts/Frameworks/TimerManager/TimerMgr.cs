@@ -20,28 +20,28 @@ namespace JLXB.Framework.Timer
         /// <summary>
         /// How long the timer takes to complete from start to finish.
         /// </summary>
-        public float duration { get; private set; }
+        public float Duration { get; private set; }
 
         /// <summary>
         /// Whether the timer will run again after completion.
         /// </summary>
-        public bool isLooped { get; set; }
+        public bool IsLooped { get; set; }
 
         /// <summary>
         /// Whether or not the timer completed running. This is false if the timer was cancelled.
         /// </summary>
-        public bool isCompleted { get; private set; }
+        public bool IsCompleted { get; private set; }
 
         /// <summary>
         /// Whether the timer uses real-time or game-time. Real time is unaffected by changes to the timescale
         /// of the game(e.g. pausing, slow-mo), while game time is affected.
         /// </summary>
-        public bool usesRealTime { get; private set; }
+        public bool UsesRealTime { get; private set; }
 
         /// <summary>
         /// Whether the timer is currently paused.
         /// </summary>
-        public bool isPaused
+        public bool IsPaused
         {
             get { return this._timeElapsedBeforePause.HasValue; }
         }
@@ -49,7 +49,7 @@ namespace JLXB.Framework.Timer
         /// <summary>
         /// Whether or not the timer was cancelled.
         /// </summary>
-        public bool isCancelled
+        public bool IsCancelled
         {
             get { return this._timeElapsedBeforeCancel.HasValue; }
         }
@@ -57,9 +57,9 @@ namespace JLXB.Framework.Timer
         /// <summary>
         /// Get whether or not the timer has finished running for any reason.
         /// </summary>
-        public bool isDone
+        public bool IsDone
         {
-            get { return this.isCompleted || this.isCancelled || this.isOwnerDestroyed; }
+            get { return this.IsCompleted || this.IsCancelled || this.IsOwnerDestroyed; }
         }
 
         #endregion
@@ -73,7 +73,7 @@ namespace JLXB.Framework.Timer
 
         #region Private Properties/Fields
 
-        private bool isOwnerDestroyed
+        private bool IsOwnerDestroyed
         {
             get { return this._hasAutoDestroyOwner && this._autoDestroyOwner == null; }
         }
@@ -124,12 +124,9 @@ namespace JLXB.Framework.Timer
             bool isLooped = false, bool useRealTime = false, MonoBehaviour autoDestroyOwner = null)
         {
             // create a manager object to update all the timers if one does not already exist.
-            if (Timer._manager == null)
-            {
-                Timer._manager = TimerMgr.Instance;
-            }
+            Timer._manager ??= TimerMgr.Instance;
 
-            Timer timer = new Timer(duration, onComplete, onFrameUpdate, isLooped, useRealTime, autoDestroyOwner);
+            Timer timer = new(duration, onComplete, onFrameUpdate, isLooped, useRealTime, autoDestroyOwner);
             Timer._manager.RegisterTimer(timer);
             return timer;
         }
@@ -141,10 +138,7 @@ namespace JLXB.Framework.Timer
         /// <param name="timer">The timer to cancel.</param>
         public static void Cancel(Timer timer)
         {
-            if (timer != null)
-            {
-                timer.Cancel();
-            }
+            timer?.Cancel();
         }
 
         /// <summary>
@@ -154,10 +148,7 @@ namespace JLXB.Framework.Timer
         /// <param name="timer">The timer to pause.</param>
         public static void Pause(Timer timer)
         {
-            if (timer != null)
-            {
-                timer.Pause();
-            }
+            timer?.Pause();
         }
 
         /// <summary>
@@ -167,18 +158,12 @@ namespace JLXB.Framework.Timer
         /// <param name="timer">The timer to resume.</param>
         public static void Resume(Timer timer)
         {
-            if (timer != null)
-            {
-                timer.Resume();
-            }
+            timer?.Resume();
         }
 
         public static void CancelAllRegisteredTimers()
         {
-            if (Timer._manager != null)
-            {
-                Timer._manager.CancelAllTimers();
-            }
+            Timer._manager?.CancelAllTimers();
 
             // if the manager doesn't exist, we don't have any registered timers yet, so don't
             // need to do anything in this case
@@ -186,10 +171,7 @@ namespace JLXB.Framework.Timer
 
         public static void PauseAllRegisteredTimers()
         {
-            if (Timer._manager != null)
-            {
-                Timer._manager.PauseAllTimers();
-            }
+            Timer._manager?.PauseAllTimers();
 
             // if the manager doesn't exist, we don't have any registered timers yet, so don't
             // need to do anything in this case
@@ -197,10 +179,7 @@ namespace JLXB.Framework.Timer
 
         public static void ResumeAllRegisteredTimers()
         {
-            if (Timer._manager != null)
-            {
-                Timer._manager.ResumeAllTimers();
-            }
+            Timer._manager?.ResumeAllTimers();
 
             // if the manager doesn't exist, we don't have any registered timers yet, so don't
             // need to do anything in this case
@@ -215,7 +194,7 @@ namespace JLXB.Framework.Timer
         /// </summary>
         public void Cancel()
         {
-            if (this.isDone)
+            if (this.IsDone)
             {
                 return;
             }
@@ -229,7 +208,7 @@ namespace JLXB.Framework.Timer
         /// </summary>
         public void Pause()
         {
-            if (this.isPaused || this.isDone)
+            if (this.IsPaused || this.IsDone)
             {
                 return;
             }
@@ -242,7 +221,7 @@ namespace JLXB.Framework.Timer
         /// </summary>
         public void Resume()
         {
-            if (!this.isPaused || this.isDone)
+            if (!this.IsPaused || this.IsDone)
             {
                 return;
             }
@@ -262,9 +241,9 @@ namespace JLXB.Framework.Timer
         /// starting and when it was cancelled/paused.</returns>
         public float GetTimeElapsed()
         {
-            if (this.isCompleted || this.GetWorldTime() >= this.GetFireTime())
+            if (this.IsCompleted || this.GetWorldTime() >= this.GetFireTime())
             {
-                return this.duration;
+                return this.Duration;
             }
 
             return this._timeElapsedBeforeCancel ??
@@ -280,7 +259,7 @@ namespace JLXB.Framework.Timer
         /// if the timer completed.</returns>
         public float GetTimeRemaining()
         {
-            return this.duration - this.GetTimeElapsed();
+            return this.Duration - this.GetTimeElapsed();
         }
 
         /// <summary>
@@ -289,7 +268,7 @@ namespace JLXB.Framework.Timer
         /// <returns>A value from 0 to 1 indicating how much of the timer's duration has been elapsed.</returns>
         public float GetRatioComplete()
         {
-            return this.GetTimeElapsed() / this.duration;
+            return this.GetTimeElapsed() / this.Duration;
         }
 
         /// <summary>
@@ -298,7 +277,7 @@ namespace JLXB.Framework.Timer
         /// <returns>A value from 0 to 1 indicating how much of the timer's duration remains to be elapsed.</returns>
         public float GetRatioRemaining()
         {
-            return this.GetTimeRemaining() / this.duration;
+            return this.GetTimeRemaining() / this.Duration;
         }
 
         #endregion
@@ -308,12 +287,12 @@ namespace JLXB.Framework.Timer
         private Timer(float duration, UnityAction onComplete, UnityAction<float> onFrameUpdate,
             bool isLooped, bool usesRealTime, MonoBehaviour autoDestroyOwner)
         {
-            this.duration = duration;
+            this.Duration = duration;
             this._onComplete = onComplete;
             this._onFrameUpdate = onFrameUpdate;
 
-            this.isLooped = isLooped;
-            this.usesRealTime = usesRealTime;
+            this.IsLooped = isLooped;
+            this.UsesRealTime = usesRealTime;
 
             this._autoDestroyOwner = autoDestroyOwner;
             this._hasAutoDestroyOwner = autoDestroyOwner != null;
@@ -328,12 +307,12 @@ namespace JLXB.Framework.Timer
 
         private float GetWorldTime()
         {
-            return this.usesRealTime ? Time.realtimeSinceStartup : Time.time;
+            return this.UsesRealTime ? Time.realtimeSinceStartup : Time.time;
         }
 
         private float GetFireTime()
         {
-            return this._startTime + this.duration;
+            return this._startTime + this.Duration;
         }
 
         private float GetTimeDelta()
@@ -343,12 +322,12 @@ namespace JLXB.Framework.Timer
 
         private void Update()
         {
-            if (this.isDone)
+            if (this.IsDone)
             {
                 return;
             }
 
-            if (this.isPaused)
+            if (this.IsPaused)
             {
                 this._startTime += this.GetTimeDelta();
                 this._lastUpdateTime = this.GetWorldTime();
@@ -357,26 +336,20 @@ namespace JLXB.Framework.Timer
 
             this._lastUpdateTime = this.GetWorldTime();
 
-            if (this._onFrameUpdate != null)
-            {
-                this._onFrameUpdate(this.GetTimeElapsed());
-            }
+            this._onFrameUpdate?.Invoke(this.GetTimeElapsed());
 
             if (this.GetWorldTime() >= this.GetFireTime())
             {
 
-                if (this._onComplete != null)
-                {
-                    this._onComplete();
-                }
+                this._onComplete?.Invoke();
 
-                if (this.isLooped)
+                if (this.IsLooped)
                 {
                     this._startTime = this.GetWorldTime();
                 }
                 else
                 {
-                    this.isCompleted = true;
+                    this.IsCompleted = true;
                 }
             }
         }
@@ -392,10 +365,10 @@ namespace JLXB.Framework.Timer
         /// </summary>
         private class TimerMgr : Singleton<TimerMgr>
         {
-            private List<Timer> _timers = new List<Timer>();
+            private List<Timer> _timers = new();
 
             // buffer adding timers so we don't edit a collection during iteration
-            private List<Timer> _timersToAdd = new List<Timer>();
+            private List<Timer> _timersToAdd = new();
 
             public void RegisterTimer(Timer timer)
             {
@@ -450,7 +423,7 @@ namespace JLXB.Framework.Timer
                         timer.Update();
                     }
 
-                    this._timers.RemoveAll(t => t.isDone);
+                    this._timers.RemoveAll(t => t.IsDone);
                     yield return null;
                 }
             }

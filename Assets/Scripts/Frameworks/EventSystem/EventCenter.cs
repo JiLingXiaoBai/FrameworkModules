@@ -54,7 +54,7 @@ namespace JLXB.Framework.Event
             }
         }
 
-        private static Dictionary<string, IEventData> m_EventTable = new Dictionary<string, IEventData>();
+        private static readonly Dictionary<string, IEventData> m_EventTable = new();
 
 
         private static void OnRegistering(string key, IEventData eventData)

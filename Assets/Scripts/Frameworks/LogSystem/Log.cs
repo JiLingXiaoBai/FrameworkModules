@@ -6,25 +6,24 @@ namespace JLXB.Framework.LogSystem
     public class Log
     {
 #if UNITY_EDITOR
-        [UnityEditor.Callbacks.OnOpenAssetAttribute(0)]
+        [UnityEditor.Callbacks.OnOpenAsset(0)]
         private static bool OnOpenAsset(int instanceID, int line)
         {
             string stackTrace = GetStackTrace();
             if (!string.IsNullOrEmpty(stackTrace) && stackTrace.Contains("Log.cs"))
             {
                 System.Text.RegularExpressions.Match matches = System.Text.RegularExpressions.Regex.Match(stackTrace, @"\(at (.+)\)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                string pathLine = "";
                 while (matches.Success)
                 {
-                    pathLine = matches.Groups[1].Value;
+                    string pathLine = matches.Groups[1].Value;
 
                     if (!pathLine.Contains("JLXB.Framework.LogSystem"))
                     {
                         int splitIndex = pathLine.LastIndexOf(":");
-                        string path = pathLine.Substring(0, splitIndex);
-                        line = System.Convert.ToInt32(pathLine.Substring(splitIndex + 1));
-                        string fullPath = Application.dataPath.Substring(0, Application.dataPath.LastIndexOf("Assets"));
-                        fullPath = fullPath + path;
+                        string path = pathLine[..splitIndex];
+                        line = Convert.ToInt32(pathLine[(splitIndex + 1)..]);
+                        string fullPath = Application.dataPath[..Application.dataPath.LastIndexOf("Assets")];
+                        fullPath += path;
                         UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(fullPath.Replace('/', '\\'), line);
                         break;
                     }
@@ -54,43 +53,49 @@ namespace JLXB.Framework.LogSystem
 #endif
         public static void EnableLog(bool enable)
         {
-            Logging.Instance.EnableLog = enable;
+            LogSystem.Instance.EnableLog = enable;
         }
 
-        public static void LogLevel(LogLevel level)
+        public static void SetLogLevel(LogLevel level)
         {
-            Logging.Instance.logLevel = level;
+            LogSystem.Instance.LogLevel = level;
         }
 
         public static void RegisterLogMessage()
         {
-            Application.logMessageReceived += HandleLog;
+            Application.logMessageReceivedThreaded += HandleLog;
         }
 
         public static void UnRegisterLogMessage()
         {
-            Application.logMessageReceived -= HandleLog;
+            Application.logMessageReceivedThreaded -= HandleLog;
         }
 
-        public static void HandleLog(string condition, string stackTrace, LogType type)
+        private static void HandleLog(string condition, string stackTrace, LogType type)
         {
             switch (type)
             {
                 case LogType.Error:
-                    Error((object)condition, stackTrace);
-                    break;
-                case LogType.Assert:
+                    HandleLog(LogLevel.ERROR, condition, stackTrace);
                     break;
                 case LogType.Log:
-                    Debug((object)condition, stackTrace);
+                    HandleLog(LogLevel.DEBUG, condition, stackTrace);
                     break;
                 case LogType.Exception:
-                    Error((object)condition, stackTrace);
+                    HandleLog(LogLevel.ERROR, condition, stackTrace);
                     break;
                 case LogType.Warning:
-                    Warn((object)condition, stackTrace);
+                    HandleLog(LogLevel.WARN, condition, stackTrace);
+                    break;
+                case LogType.Assert:
+                    HandleLog(LogLevel.ALL, condition, stackTrace);
                     break;
             }
+        }
+
+        private static void HandleLog(LogLevel level, string condition, string stackTrace)
+        {
+            LogSystem.Instance.HandleLog(level, condition, stackTrace);
         }
 
         public static void LoadAppenders(AppenderType type)
@@ -98,88 +103,99 @@ namespace JLXB.Framework.LogSystem
             switch (type)
             {
                 case AppenderType.Console:
-                    LoadAppenders(ConsoleAppender.Instance);
+                    LogSystem.Instance.LoadAppenders(type, ConsoleAppender.Instance);
                     break;
 
                     // case AppenderType.File:
-                    //     LoadAppenders(FileAppender.Instance);
+                    //     Logging.Instance.LoadAppenders(type, FileAppender.Instance);
                     //     break;
             }
         }
 
-        public static void LoadAppenders(ILogAppender appender)
-        {
-            Logging.Instance.LoadAppenders(appender);
-        }
-
-        public static void UnloadAppenders(ILogAppender appender)
-        {
-            Logging.Instance.UnloadAppenders(appender);
-        }
 
         public static void Debug(object message)
         {
-            Logging.Instance.Debug(message);
+            LogSystem.Instance.Debug(message);
         }
         public static void Debug(object message, string track)
         {
-            Logging.Instance.Debug(message, track);
+            LogSystem.Instance.Debug(message, track);
         }
         public static void Debug(object message, Exception e)
         {
-            Logging.Instance.Debug(message, e);
+            LogSystem.Instance.Debug(message, e);
+        }
+        public static void Debug(string format, params object[] args)
+        {
+            LogSystem.Instance.Debug(format, args);
         }
 
         public static void Info(object message)
         {
-            Logging.Instance.Info(message);
+            LogSystem.Instance.Info(message);
         }
         public static void Info(object message, string track)
         {
-            Logging.Instance.Info(message, track);
+            LogSystem.Instance.Info(message, track);
         }
         public static void Info(object message, Exception e)
         {
-            Logging.Instance.Info(message, e);
+            LogSystem.Instance.Info(message, e);
+        }
+        public static void Info(string format, params object[] args)
+        {
+            LogSystem.Instance.Info(format, args);
         }
 
         public static void Warn(object message)
         {
-            Logging.Instance.Warn(message);
+            LogSystem.Instance.Warn(message);
         }
         public static void Warn(object message, string track)
         {
-            Logging.Instance.Warn(message, track);
+            LogSystem.Instance.Warn(message, track);
         }
         public static void Warn(object message, Exception e)
         {
-            Logging.Instance.Warn(message, e);
+            LogSystem.Instance.Warn(message, e);
+        }
+        public static void Warn(string format, params object[] args)
+        {
+            LogSystem.Instance.Warn(format, args);
         }
 
         public static void Error(object message)
         {
-            Logging.Instance.Error(message);
+            LogSystem.Instance.Error(message);
         }
         public static void Error(object message, string track)
         {
-            Logging.Instance.Error(message, track);
+            LogSystem.Instance.Error(message, track);
         }
         public static void Error(object message, Exception e)
         {
-            Logging.Instance.Error(message, e);
+            LogSystem.Instance.Error(message, e);
+        }
+        public static void Error(string format, params object[] args)
+        {
+            LogSystem.Instance.Error(format, args);
         }
 
         public static void Fatal(object message)
         {
-            Logging.Instance.Fatal(message);
+            LogSystem.Instance.Fatal(message);
         }
         public static void Fatal(object message, string track)
         {
-            Logging.Instance.Fatal(message, track);
+            LogSystem.Instance.Fatal(message, track);
         }
         public static void Fatal(object message, Exception e)
         {
-            Logging.Instance.Fatal(message, e);
+            LogSystem.Instance.Fatal(message, e);
+        }
+        public static void Fatal(string format, params object[] args)
+        {
+            LogSystem.Instance.Fatal(format, args);
         }
     }
 }
