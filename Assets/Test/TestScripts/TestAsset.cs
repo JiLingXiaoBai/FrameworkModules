@@ -4,6 +4,8 @@ using UnityEngine;
 using JLXB.Framework.Asset;
 using JLXB.Framework.Timer;
 using UnityEngine.UI;
+using JLXB.Framework.LogSystem;
+using JLXB.Framework;
 
 public class TestAsset : MonoBehaviour
 {

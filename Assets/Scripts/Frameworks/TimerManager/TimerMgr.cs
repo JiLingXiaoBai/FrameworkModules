@@ -429,7 +429,7 @@ namespace JLXB.Framework.Timer
                 }
             }
 
-            public TimerMgr()
+            private TimerMgr()
             {
                 MonoMgr.Instance.StartCoroutine(UpdateAllTimers());
             }

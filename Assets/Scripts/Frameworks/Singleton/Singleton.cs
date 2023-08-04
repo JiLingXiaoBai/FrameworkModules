@@ -1,25 +1,28 @@
+using System;
+using System.Reflection;
+using System.Linq;
+
 namespace JLXB.Framework
 {
-    public class Singleton<T> where T : class, new()
+    public abstract class Singleton<T> where T : class
     {
-        private static T _instance = null;
-        private static readonly object padlock = new object();
+        private static readonly Lazy<T> _instance = new Lazy<T>(() =>
+            {
+                var ctors = typeof(T).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (ctors.Count() != 1)
+                    throw new InvalidOperationException(String.Format("Type {0} must have exactly one constructor.", typeof(T)));
+                var ctor = ctors.SingleOrDefault(c => !c.GetParameters().Any() && c.IsPrivate);
+                if (ctor == null)
+                    throw new InvalidOperationException(String.Format("The constructor for {0} must be private and take no parameters.", typeof(T)));
+                return (T)ctor.Invoke(null);
+            }, true
+        );
 
         public static T Instance
         {
             get
             {
-                if (_instance == null)
-                {
-                    lock (padlock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new T();
-                        }
-                    }
-                }
-                return _instance;
+                return _instance.Value;
             }
         }
     }

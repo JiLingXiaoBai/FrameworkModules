@@ -12,7 +12,7 @@ namespace JLXB.Framework.Asset
 {
     public class AssetMgr : Singleton<AssetMgr>
     {
-
+        private AssetMgr() { }
         private readonly Dictionary<string, AsyncOperationHandle> _caches = new();
 
         public void LoadAssetAsync<T>(string key, UnityAction<T> callback, bool autoRelease = true) where T : UnityEngine.Object
