@@ -1,12 +1,13 @@
 using System;
 using UnityEngine;
+using UnityEditor.Callbacks;
 
 namespace JLXB.Framework.LogSystem
 {
     public class Log
     {
 #if UNITY_EDITOR
-        [UnityEditor.Callbacks.OnOpenAsset(0)]
+        [OnOpenAsset(0)]
         private static bool OnOpenAsset(int instanceID, int line)
         {
             string stackTrace = GetStackTrace();
@@ -51,24 +52,15 @@ namespace JLXB.Framework.LogSystem
             return null;
         }
 #endif
-        public static void EnableLog(bool enable)
-        {
-            LogSystem.Instance.EnableLog = enable;
-        }
 
-        public static void SetLogLevel(LogLevel level)
-        {
-            LogSystem.Instance.LogLevel = level;
-        }
+        private static string FormatTrack { get { return LogSystem.Instance.GetFormatTrack(); } }
+        private static string ExceptionTrack { get; set; }
+        private static string BriefnessTrack { get { return LogSystem.Instance.GetBriefnessTrack(); } }
+        private static string LogContent { get; set; }
 
-        public static void RegisterLogMessage()
+        private static string FormatString(object message, LogLevel level, string track)
         {
-            Application.logMessageReceivedThreaded += HandleLog;
-        }
-
-        public static void UnRegisterLogMessage()
-        {
-            Application.logMessageReceivedThreaded -= HandleLog;
+            return string.Format("{0}\n[{1,-5}] {2}\n", message, level, track);
         }
 
         private static void HandleLog(string condition, string stackTrace, LogType type)
@@ -95,107 +87,167 @@ namespace JLXB.Framework.LogSystem
 
         private static void HandleLog(LogLevel level, string condition, string stackTrace)
         {
-            LogSystem.Instance.HandleLog(level, condition, stackTrace);
+            LogSystem.Instance.LogRecord(level, condition, stackTrace);
+        }
+
+        public static void EnableLog(bool enable)
+        {
+            LogSystem.Instance.EnableLog = enable;
+        }
+
+        public static void SetLogLevel(LogLevel level)
+        {
+            LogSystem.Instance.LogLevel = level;
+        }
+
+        public static void RegisterLogMessage()
+        {
+            Application.logMessageReceived += HandleLog;
+        }
+
+        public static void UnRegisterLogMessage()
+        {
+            Application.logMessageReceived -= HandleLog;
         }
 
         public static void LoadAppenders(AppenderType type)
         {
             switch (type)
             {
-                case AppenderType.Console:
-                    LogSystem.Instance.LoadAppenders(type, ConsoleAppender.Instance);
+                case AppenderType.File:
+                    LogSystem.Instance.LoadAppenders(type, FileAppender.Instance);
                     break;
-
-                    // case AppenderType.File:
-                    //     Logging.Instance.LoadAppenders(type, FileAppender.Instance);
-                    //     break;
             }
         }
 
-
         public static void Debug(object message)
         {
-            LogSystem.Instance.Debug(message);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.DEBUG)) return;
+            LogContent = FormatString(message, LogLevel.DEBUG, BriefnessTrack);
+            UnityEngine.Debug.Log(LogContent);
         }
         public static void Debug(object message, string track)
         {
-            LogSystem.Instance.Debug(message, track);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.DEBUG)) return;
+            LogContent = FormatString(message, LogLevel.DEBUG, track);
+            UnityEngine.Debug.Log(LogContent);
         }
         public static void Debug(object message, Exception e)
         {
-            LogSystem.Instance.Debug(message, e);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.DEBUG)) return;
+            ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
+            LogContent = FormatString(message, LogLevel.DEBUG, ExceptionTrack);
+            UnityEngine.Debug.Log(LogContent);
         }
         public static void Debug(string format, params object[] args)
         {
-            LogSystem.Instance.Debug(format, args);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.DEBUG)) return;
+            LogContent = FormatString(string.Format(format, args), LogLevel.DEBUG, FormatTrack);
+            UnityEngine.Debug.Log(LogContent);
         }
 
         public static void Info(object message)
         {
-            LogSystem.Instance.Info(message);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.INFO)) return;
+            LogContent = FormatString(message, LogLevel.INFO, BriefnessTrack);
+            UnityEngine.Debug.Log(LogContent);
         }
         public static void Info(object message, string track)
         {
-            LogSystem.Instance.Info(message, track);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.INFO)) return;
+            LogContent = FormatString(message, LogLevel.INFO, track);
+            UnityEngine.Debug.Log(LogContent);
         }
         public static void Info(object message, Exception e)
         {
-            LogSystem.Instance.Info(message, e);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.INFO)) return;
+            ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
+            LogContent = FormatString(message, LogLevel.INFO, ExceptionTrack);
+            UnityEngine.Debug.Log(LogContent);
         }
         public static void Info(string format, params object[] args)
         {
-            LogSystem.Instance.Info(format, args);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.INFO)) return;
+            LogContent = FormatString(string.Format(format, args), LogLevel.INFO, FormatTrack);
+            UnityEngine.Debug.Log(LogContent);
         }
 
         public static void Warn(object message)
         {
-            LogSystem.Instance.Warn(message);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.WARN)) return;
+            LogContent = FormatString(message, LogLevel.WARN, BriefnessTrack);
+            UnityEngine.Debug.LogWarning(LogContent);
         }
         public static void Warn(object message, string track)
         {
-            LogSystem.Instance.Warn(message, track);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.WARN)) return;
+            LogContent = FormatString(message, LogLevel.WARN, track);
+            UnityEngine.Debug.LogWarning(LogContent);
         }
         public static void Warn(object message, Exception e)
         {
-            LogSystem.Instance.Warn(message, e);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.WARN)) return;
+            ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
+            LogContent = FormatString(message, LogLevel.WARN, ExceptionTrack);
+            UnityEngine.Debug.LogWarning(LogContent);
         }
         public static void Warn(string format, params object[] args)
         {
-            LogSystem.Instance.Warn(format, args);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.WARN)) return;
+            LogContent = FormatString(string.Format(format, args), LogLevel.WARN, FormatTrack);
+            UnityEngine.Debug.LogWarning(LogContent);
         }
 
         public static void Error(object message)
         {
-            LogSystem.Instance.Error(message);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.ERROR)) return;
+            LogContent = FormatString(message, LogLevel.ERROR, BriefnessTrack);
+            UnityEngine.Debug.LogError(LogContent);
         }
         public static void Error(object message, string track)
         {
-            LogSystem.Instance.Error(message, track);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.ERROR)) return;
+            LogContent = FormatString(message, LogLevel.ERROR, track);
+            UnityEngine.Debug.LogError(LogContent);
         }
         public static void Error(object message, Exception e)
         {
-            LogSystem.Instance.Error(message, e);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.ERROR)) return;
+            ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
+            LogContent = FormatString(message, LogLevel.ERROR, ExceptionTrack);
+            UnityEngine.Debug.LogError(LogContent);
         }
         public static void Error(string format, params object[] args)
         {
-            LogSystem.Instance.Error(format, args);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.ERROR)) return;
+            LogContent = FormatString(string.Format(format, args), LogLevel.ERROR, FormatTrack);
+            UnityEngine.Debug.LogError(LogContent);
         }
 
         public static void Fatal(object message)
         {
-            LogSystem.Instance.Fatal(message);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.FATAL)) return;
+            LogContent = FormatString(message, LogLevel.FATAL, BriefnessTrack);
+            UnityEngine.Debug.LogError(LogContent);
         }
         public static void Fatal(object message, string track)
         {
-            LogSystem.Instance.Fatal(message, track);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.FATAL)) return;
+            LogContent = FormatString(message, LogLevel.FATAL, track);
+            UnityEngine.Debug.LogError(LogContent);
         }
         public static void Fatal(object message, Exception e)
         {
-            LogSystem.Instance.Fatal(message, e);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.FATAL)) return;
+            ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
+            LogContent = FormatString(message, LogLevel.FATAL, ExceptionTrack);
+            UnityEngine.Debug.LogError(LogContent);
         }
         public static void Fatal(string format, params object[] args)
         {
-            LogSystem.Instance.Fatal(format, args);
+            if (!LogSystem.Instance.CheckOutPut(LogLevel.FATAL)) return;
+            LogContent = FormatString(string.Format(format, args), LogLevel.FATAL, FormatTrack);
+            UnityEngine.Debug.LogError(LogContent);
         }
     }
 }

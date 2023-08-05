@@ -33,7 +33,6 @@ namespace JLXB.Framework.LogSystem
     public enum AppenderType
     {
         File,          // 文件输出
-        Console,       // 控制台输出
     }
 
     public class LogSystem : Singleton<LogSystem>
@@ -46,13 +45,13 @@ namespace JLXB.Framework.LogSystem
 
         public LogLevel LogLevel { get; set; }
 
-        private bool isInitConfig = false;
+        private bool _isInitFlag = false;
 
         private LogSystem() { }
 
         private StackTrace StackTrace
         {
-            get { return new StackTrace(3, true); }
+            get { return new StackTrace(4, true); }
         }
 
         public void LoadAppenders(AppenderType appenderType, ILogAppender appender)
@@ -102,12 +101,13 @@ namespace JLXB.Framework.LogSystem
 
         private string GetRelativePath(string path)
         {
+            if (path == null) return null;
             path = path[path.IndexOf("Assets")..];
             path = path.Replace('\\', '/');
             return path;
         }
 
-        private string GetBriefnessTrack(StackFrame frame)
+        private string TrackBriefness(StackFrame frame)
         {
             return string.Format("{0}:{1}({2}) (at {3}:{4,3})",
                 frame.GetMethod().DeclaringType.Name,
@@ -122,12 +122,22 @@ namespace JLXB.Framework.LogSystem
             StringBuilder builder = new(120);
             foreach (var item in stackTrace.GetFrames())
             {
-                builder.Append(string.Format(GetBriefnessTrack(item))).Append("\r\n");
+                builder.Append(TrackBriefness(item)).Append("\r\n");
             }
             return builder.ToString();
         }
 
-        private string GetExceptionTrack(Exception e)
+        public string GetFormatTrack()
+        {
+            return TrackFormatting(StackTrace);
+        }
+
+        public string GetBriefnessTrack()
+        {
+            return TrackBriefness(StackTrace.GetFrame(1));
+        }
+
+        public string GetExceptionTrack(Exception e)
         {
             StringBuilder builder = new(120);
             builder.Append("Error:" + e.Message).Append("\r\n");
@@ -138,123 +148,32 @@ namespace JLXB.Framework.LogSystem
             return builder.ToString();
         }
 
-        private void LogRecord(LogLevel level, object message, string track = "", bool receivedHandle = false)
+        public void LogRecord(LogLevel level, object message, string track = "")
         {
-            if (!isInitConfig)
-            {
-                LogConfig.Instance.Init();
-                isInitConfig = true;
-            }
-            if (!IsOutputLog(level)) return;
             LogData data = new()
             {
                 logTime = DateTime.Now,
                 logLevel = level,
                 logMessage = message,
-                logBasicData = GetBriefnessTrack(StackTrace.GetFrame(1)),
+                logBasicData = TrackBriefness(StackTrace.GetFrame(1)),
                 logTrack = track
             };
 
             foreach (var appender in _allAppenders)
             {
-                if (receivedHandle == (appender.Key == AppenderType.Console))
-                    continue;
                 appender.Value.Log(data);
             }
         }
 
-        public void HandleLog(LogLevel level, object message, string track)
+        public bool CheckOutPut(LogLevel level)
         {
-            LogRecord(level, message, track, true);
+            if (!_isInitFlag)
+            {
+                LogConfig.Instance.Init();
+                _isInitFlag = true;
+            }
+            return IsOutputLog(level);
         }
 
-        public void Debug(object message)
-        {
-            LogRecord(LogLevel.DEBUG, message, TrackFormatting(StackTrace));
-        }
-        public void Debug(string format, params object[] args)
-        {
-            LogRecord(LogLevel.DEBUG, string.Format(format, args), TrackFormatting(StackTrace));
-        }
-        public void Debug(object message, string track)
-        {
-            LogRecord(LogLevel.DEBUG, message, track);
-        }
-        public void Debug(object message, Exception e)
-        {
-            LogRecord(LogLevel.DEBUG, message, GetExceptionTrack(e));
-        }
-
-        public void Info(object message)
-        {
-            LogRecord(LogLevel.INFO, message, TrackFormatting(StackTrace));
-        }
-        public void Info(string format, params object[] args)
-        {
-            LogRecord(LogLevel.INFO, string.Format(format, args), TrackFormatting(StackTrace));
-        }
-        public void Info(object message, string track)
-        {
-            LogRecord(LogLevel.INFO, message, track);
-        }
-        public void Info(object message, Exception e)
-        {
-            LogRecord(LogLevel.INFO, message, GetExceptionTrack(e));
-        }
-
-        public void Warn(object message)
-        {
-            LogRecord(LogLevel.WARN, message, TrackFormatting(StackTrace));
-        }
-        public void Warn(string format, params object[] args)
-        {
-            LogRecord(LogLevel.WARN, string.Format(format, args), TrackFormatting(StackTrace));
-        }
-        public void Warn(object message, string track)
-        {
-            LogRecord(LogLevel.WARN, message, track);
-        }
-        public void Warn(object message, Exception e)
-        {
-            LogRecord(LogLevel.WARN, message, GetExceptionTrack(e));
-        }
-
-        public void Error(object message)
-        {
-            LogRecord(LogLevel.ERROR, message, TrackFormatting(StackTrace));
-        }
-        public void Error(string format, params object[] args)
-        {
-            LogRecord(LogLevel.ERROR, string.Format(format, args), TrackFormatting(StackTrace));
-        }
-        public void Error(object message, string track)
-        {
-            LogRecord(LogLevel.ERROR, message, track);
-        }
-        public void Error(object message, Exception e)
-        {
-            LogRecord(LogLevel.ERROR, message, GetExceptionTrack(e));
-        }
-
-        public void Fatal(object message)
-        {
-            LogRecord(LogLevel.FATAL, message, TrackFormatting(StackTrace));
-        }
-        public void Fatal(string format, params object[] args)
-        {
-            LogRecord(LogLevel.FATAL, string.Format(format, args), TrackFormatting(StackTrace));
-        }
-        public void Fatal(object message, string track)
-        {
-            LogRecord(LogLevel.FATAL, message, track);
-        }
-        public void Fatal(object message, Exception e)
-        {
-            LogRecord(LogLevel.FATAL, message, GetExceptionTrack(e));
-        }
     }
-
-
-
-
 }
