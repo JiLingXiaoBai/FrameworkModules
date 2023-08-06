@@ -63,189 +63,132 @@ namespace JLXB.Framework.LogSystem
             return string.Format("{0}\n[{1,-5}] {2}\n", message, level, track);
         }
 
-        private static void HandleLog(string condition, string stackTrace, LogType type)
-        {
-            switch (type)
-            {
-                case LogType.Error:
-                    HandleLog(LogLevel.ERROR, condition, stackTrace);
-                    break;
-                case LogType.Log:
-                    HandleLog(LogLevel.DEBUG, condition, stackTrace);
-                    break;
-                case LogType.Exception:
-                    HandleLog(LogLevel.ERROR, condition, stackTrace);
-                    break;
-                case LogType.Warning:
-                    HandleLog(LogLevel.WARN, condition, stackTrace);
-                    break;
-                case LogType.Assert:
-                    HandleLog(LogLevel.ALL, condition, stackTrace);
-                    break;
-            }
-        }
-
-        private static void HandleLog(LogLevel level, string condition, string stackTrace)
-        {
-            LogSystem.Instance.LogRecord(level, condition, stackTrace);
-        }
-
-        public static void EnableLog(bool enable)
-        {
-            LogSystem.Instance.EnableLog = enable;
-        }
-
-        public static void SetLogLevel(LogLevel level)
-        {
-            LogSystem.Instance.LogLevel = level;
-        }
-
-        public static void RegisterLogMessage()
-        {
-            Application.logMessageReceived += HandleLog;
-        }
-
-        public static void UnRegisterLogMessage()
-        {
-            Application.logMessageReceived -= HandleLog;
-        }
-
-        public static void LoadAppenders(AppenderType type)
-        {
-            switch (type)
-            {
-                case AppenderType.File:
-                    LogSystem.Instance.LoadAppenders(type, FileAppender.Instance);
-                    break;
-            }
-        }
-
         public static void Debug(object message)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.DEBUG)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.DEBUG)) return;
             LogContent = FormatString(message, LogLevel.DEBUG, BriefnessTrack);
             UnityEngine.Debug.Log(LogContent);
         }
         public static void Debug(object message, string track)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.DEBUG)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.DEBUG)) return;
             LogContent = FormatString(message, LogLevel.DEBUG, track);
             UnityEngine.Debug.Log(LogContent);
         }
         public static void Debug(object message, Exception e)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.DEBUG)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.DEBUG)) return;
             ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
             LogContent = FormatString(message, LogLevel.DEBUG, ExceptionTrack);
             UnityEngine.Debug.Log(LogContent);
         }
         public static void Debug(string format, params object[] args)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.DEBUG)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.DEBUG)) return;
             LogContent = FormatString(string.Format(format, args), LogLevel.DEBUG, FormatTrack);
             UnityEngine.Debug.Log(LogContent);
         }
 
         public static void Info(object message)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.INFO)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.INFO)) return;
             LogContent = FormatString(message, LogLevel.INFO, BriefnessTrack);
             UnityEngine.Debug.Log(LogContent);
         }
         public static void Info(object message, string track)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.INFO)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.INFO)) return;
             LogContent = FormatString(message, LogLevel.INFO, track);
             UnityEngine.Debug.Log(LogContent);
         }
         public static void Info(object message, Exception e)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.INFO)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.INFO)) return;
             ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
             LogContent = FormatString(message, LogLevel.INFO, ExceptionTrack);
             UnityEngine.Debug.Log(LogContent);
         }
         public static void Info(string format, params object[] args)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.INFO)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.INFO)) return;
             LogContent = FormatString(string.Format(format, args), LogLevel.INFO, FormatTrack);
             UnityEngine.Debug.Log(LogContent);
         }
 
         public static void Warn(object message)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.WARN)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.WARN)) return;
             LogContent = FormatString(message, LogLevel.WARN, BriefnessTrack);
             UnityEngine.Debug.LogWarning(LogContent);
         }
         public static void Warn(object message, string track)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.WARN)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.WARN)) return;
             LogContent = FormatString(message, LogLevel.WARN, track);
             UnityEngine.Debug.LogWarning(LogContent);
         }
         public static void Warn(object message, Exception e)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.WARN)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.WARN)) return;
             ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
             LogContent = FormatString(message, LogLevel.WARN, ExceptionTrack);
             UnityEngine.Debug.LogWarning(LogContent);
         }
         public static void Warn(string format, params object[] args)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.WARN)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.WARN)) return;
             LogContent = FormatString(string.Format(format, args), LogLevel.WARN, FormatTrack);
             UnityEngine.Debug.LogWarning(LogContent);
         }
 
         public static void Error(object message)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.ERROR)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.ERROR)) return;
             LogContent = FormatString(message, LogLevel.ERROR, BriefnessTrack);
             UnityEngine.Debug.LogError(LogContent);
         }
         public static void Error(object message, string track)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.ERROR)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.ERROR)) return;
             LogContent = FormatString(message, LogLevel.ERROR, track);
             UnityEngine.Debug.LogError(LogContent);
         }
         public static void Error(object message, Exception e)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.ERROR)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.ERROR)) return;
             ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
             LogContent = FormatString(message, LogLevel.ERROR, ExceptionTrack);
             UnityEngine.Debug.LogError(LogContent);
         }
         public static void Error(string format, params object[] args)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.ERROR)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.ERROR)) return;
             LogContent = FormatString(string.Format(format, args), LogLevel.ERROR, FormatTrack);
             UnityEngine.Debug.LogError(LogContent);
         }
 
         public static void Fatal(object message)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.FATAL)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.FATAL)) return;
             LogContent = FormatString(message, LogLevel.FATAL, BriefnessTrack);
             UnityEngine.Debug.LogError(LogContent);
         }
         public static void Fatal(object message, string track)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.FATAL)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.FATAL)) return;
             LogContent = FormatString(message, LogLevel.FATAL, track);
             UnityEngine.Debug.LogError(LogContent);
         }
         public static void Fatal(object message, Exception e)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.FATAL)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.FATAL)) return;
             ExceptionTrack = LogSystem.Instance.GetExceptionTrack(e);
             LogContent = FormatString(message, LogLevel.FATAL, ExceptionTrack);
             UnityEngine.Debug.LogError(LogContent);
         }
         public static void Fatal(string format, params object[] args)
         {
-            if (!LogSystem.Instance.CheckOutPut(LogLevel.FATAL)) return;
+            if (!LogSystem.Instance.IsOutputLog(LogLevel.FATAL)) return;
             LogContent = FormatString(string.Format(format, args), LogLevel.FATAL, FormatTrack);
             UnityEngine.Debug.LogError(LogContent);
         }

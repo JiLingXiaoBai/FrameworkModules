@@ -28,18 +28,9 @@ namespace JLXB.Framework.LogSystem
 
         private int _fileCount;
 
-        private FileAppender()
-        {
-            Init();
-            Run();
-            MonoMgr.Instance.AddDestroyListener(() =>
-            {
-                _stopFlag = true;
-                _fileStream?.Close();
-            });
-        }
+        private FileAppender() { }
 
-        private void Init()
+        public void OnLoad()
         {
 #if UNITY_EDITOR
             //使用项目和Assets目录同级的Logs文件夹
@@ -74,6 +65,13 @@ namespace JLXB.Framework.LogSystem
             _waitList = new List<LogData>();
             _lockObj = new object();
             _stopFlag = false;
+            Run();
+        }
+
+        public void OnUnload()
+        {
+            _stopFlag = true;
+            _fileStream?.Close();
         }
 
         public void Log(LogData logData)
@@ -85,7 +83,7 @@ namespace JLXB.Framework.LogSystem
             }
         }
 
-        public void Run()
+        private void Run()
         {
             Loom.RunAsync(() =>
             {

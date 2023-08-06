@@ -10,6 +10,7 @@ public class TestLog : MonoBehaviour
     /// </summary>
     void Start()
     {
+        LogSystem.Instance.Init();
         //Debug.Log("LogSystemStart");
 
         Log.Debug("111111");

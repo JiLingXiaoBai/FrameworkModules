@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using UnityEngine;
 namespace JLXB.Framework.LogSystem
 {
     public enum LogLevel
@@ -27,6 +28,8 @@ namespace JLXB.Framework.LogSystem
 
     public interface ILogAppender
     {
+        void OnLoad();
+        void OnUnload();
         void Log(LogData data);
     }
 
@@ -45,26 +48,90 @@ namespace JLXB.Framework.LogSystem
 
         public LogLevel LogLevel { get; set; }
 
-        private bool _isInitFlag = false;
-
         private LogSystem() { }
+
+        private bool _isInited = false;
+        public void Init()
+        {
+            if (_isInited) return;
+            _isInited = true;
+            EnableLog = true;
+            LogLevel = LogLevel.ALL;
+            LoadAppender(AppenderType.File);
+            RegisterLogMessage();
+            MonoMgr.Instance.AddDestroyListener(OnDestroy);
+        }
+
+        public void OnDestroy()
+        {
+            foreach (var appender in _allAppenders)
+            {
+                appender.Value.OnUnload();
+            }
+            _allAppenders.Clear();
+            UnRegisterLogMessage();
+        }
 
         private StackTrace StackTrace
         {
             get { return new StackTrace(4, true); }
         }
 
-        public void LoadAppenders(AppenderType appenderType, ILogAppender appender)
+        public void RegisterLogMessage()
         {
-            if (_allAppenders.ContainsKey(appenderType)) return;
-
-            _allAppenders.Add(appenderType, appender);
+            Application.logMessageReceived += HandleLog;
         }
 
-        public void UnLoadAppenders(AppenderType appenderType)
+        public void UnRegisterLogMessage()
+        {
+            Application.logMessageReceived -= HandleLog;
+        }
+
+        private void HandleLog(string condition, string stackTrace, LogType type)
+        {
+            switch (type)
+            {
+                case LogType.Error:
+                    LogRecord(LogLevel.ERROR, condition, stackTrace);
+                    break;
+                case LogType.Log:
+                    LogRecord(LogLevel.DEBUG, condition, stackTrace);
+                    break;
+                case LogType.Exception:
+                    LogRecord(LogLevel.ERROR, condition, stackTrace);
+                    break;
+                case LogType.Warning:
+                    LogRecord(LogLevel.WARN, condition, stackTrace);
+                    break;
+                case LogType.Assert:
+                    LogRecord(LogLevel.ALL, condition, stackTrace);
+                    break;
+            }
+        }
+
+        public void LoadAppender(AppenderType appenderType)
+        {
+            if (_allAppenders.ContainsKey(appenderType)) return;
+            switch (appenderType)
+            {
+                case AppenderType.File:
+                    _allAppenders.Add(appenderType, FileAppender.Instance);
+                    FileAppender.Instance.OnLoad();
+                    break;
+            }
+
+        }
+
+        public void UnLoadAppender(AppenderType appenderType)
         {
             if (!_allAppenders.ContainsKey(appenderType)) return;
 
+            switch (appenderType)
+            {
+                case AppenderType.File:
+                    FileAppender.Instance.OnUnload();
+                    break;
+            }
             _allAppenders.Remove(appenderType);
         }
 
@@ -83,7 +150,7 @@ namespace JLXB.Framework.LogSystem
                 _ignoreLevel.Remove(level);
         }
 
-        private bool IsOutputLog(LogLevel level)
+        public bool IsOutputLog(LogLevel level)
         {
             if (!EnableLog || (int)LogLevel > (int)level || _ignoreLevel.Contains(level)) return false;
             return true;
@@ -164,16 +231,5 @@ namespace JLXB.Framework.LogSystem
                 appender.Value.Log(data);
             }
         }
-
-        public bool CheckOutPut(LogLevel level)
-        {
-            if (!_isInitFlag)
-            {
-                LogConfig.Instance.Init();
-                _isInitFlag = true;
-            }
-            return IsOutputLog(level);
-        }
-
     }
 }
