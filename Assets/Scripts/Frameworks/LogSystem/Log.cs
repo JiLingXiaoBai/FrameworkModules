@@ -1,13 +1,11 @@
 using System;
-using UnityEngine;
-using UnityEditor.Callbacks;
 
 namespace JLXB.Framework.LogSystem
 {
     public class Log
     {
 #if UNITY_EDITOR
-        [OnOpenAsset(0)]
+        [UnityEditor.Callbacks.OnOpenAsset(0)]
         private static bool OnOpenAsset(int instanceID, int line)
         {
             string stackTrace = GetStackTrace();
@@ -23,7 +21,7 @@ namespace JLXB.Framework.LogSystem
                         int splitIndex = pathLine.LastIndexOf(":");
                         string path = pathLine[..splitIndex];
                         line = Convert.ToInt32(pathLine[(splitIndex + 1)..]);
-                        string fullPath = Application.dataPath[..Application.dataPath.LastIndexOf("Assets")];
+                        string fullPath = UnityEngine.Application.dataPath[..UnityEngine.Application.dataPath.LastIndexOf("Assets")];
                         fullPath += path;
                         UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(fullPath.Replace('/', '\\'), line);
                         break;
