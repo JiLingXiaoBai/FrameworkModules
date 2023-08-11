@@ -3,27 +3,28 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using UnityEngine;
+
 namespace JLXB.Framework.LogSystem
 {
     public enum LogLevel
     {
-        ALL,   // 最低等级的，用于打开所有日志记录；
+        ALL, // 最低等级的，用于打开所有日志记录；
         DEBUG, // 主要用于开发过程中打印一些运行信息；
-        INFO,  // 打印一些你感兴趣的或者重要的信息，这个可以用于生产环境中输出程序运行的一些重要信息；
-        WARN,  // 表明会出现潜在错误的情形，给开发人员一些提示；
+        INFO, // 打印一些你感兴趣的或者重要的信息，这个可以用于生产环境中输出程序运行的一些重要信息；
+        WARN, // 表明会出现潜在错误的情形，给开发人员一些提示；
         ERROR, // 虽然发生错误事件，但仍然不影响系统的继续运行，打印错误和异常信息；
         FATAL, // 指出每个严重的错误事件将会导致应用程序的退出，重大错误，可以直接停止程序；
-        OFF,   // 最高等级的，用于关闭所有日志记录；
+        OFF, // 最高等级的，用于关闭所有日志记录；
     }
 
     public struct LogData
     {
-        public string logID;        // 日志ID
-        public LogLevel logLevel;   // 日志级别
-        public DateTime logTime;    // 日志时间
-        public object logMessage;   // 日志消息
+        public string logID; // 日志ID
+        public LogLevel logLevel; // 日志级别
+        public DateTime logTime; // 日志时间
+        public object logMessage; // 日志消息
         public string logBasicData; // 日志基础数据
-        public string logTrack;     // 日志堆栈信息
+        public string logTrack; // 日志堆栈信息
     }
 
     public interface ILogAppender
@@ -35,7 +36,7 @@ namespace JLXB.Framework.LogSystem
 
     public enum AppenderType
     {
-        File,          // 文件输出
+        File, // 文件输出
     }
 
     public class LogSystem : Singleton<LogSystem>
@@ -48,9 +49,12 @@ namespace JLXB.Framework.LogSystem
 
         public LogLevel LogLevel { get; set; }
 
-        private LogSystem() { }
+        private LogSystem()
+        {
+        }
 
-        private bool _isInited = false;
+        private bool _isInited;
+
         public void Init()
         {
             if (_isInited) return;
@@ -68,14 +72,12 @@ namespace JLXB.Framework.LogSystem
             {
                 appender.Value.OnUnload();
             }
+
             _allAppenders.Clear();
             UnRegisterLogMessage();
         }
 
-        private StackTrace StackTrace
-        {
-            get { return new StackTrace(4, true); }
-        }
+        private StackTrace StackTrace => new(4, true);
 
         public void RegisterLogMessage()
         {
@@ -119,7 +121,6 @@ namespace JLXB.Framework.LogSystem
                     FileAppender.Instance.OnLoad();
                     break;
             }
-
         }
 
         public void UnLoadAppender(AppenderType appenderType)
@@ -132,6 +133,7 @@ namespace JLXB.Framework.LogSystem
                     FileAppender.Instance.OnUnload();
                     break;
             }
+
             _allAppenders.Remove(appenderType);
         }
 
@@ -144,6 +146,7 @@ namespace JLXB.Framework.LogSystem
             if (!_ignoreLevel.Contains(level))
                 _ignoreLevel.Add(level);
         }
+
         public void UnIgnoreLevel(LogLevel level)
         {
             if (_ignoreLevel.Contains(level))
@@ -163,21 +166,29 @@ namespace JLXB.Framework.LogSystem
             {
                 builder.Append(item.ParameterType.Name);
             }
+
             return builder.ToString();
         }
 
         private string GetRelativePath(string path)
         {
-            if (path == null) return null;
-            path = path[path.IndexOf("Assets")..];
+            if (path == null) return "";
+            path = path[path.IndexOf("Assets", StringComparison.Ordinal)..];
             path = path.Replace('\\', '/');
             return path;
         }
 
         private string TrackBriefness(StackFrame frame)
         {
+            if (frame == null) return "";
+            
+            var declaringTypeName = "";
+            var declaringType = frame.GetMethod().DeclaringType;
+            if (declaringType != null)
+                declaringTypeName = declaringType.Name;
+
             return string.Format("{0}:{1}({2}) (at {3}:{4,3})",
-                frame.GetMethod().DeclaringType.Name,
+                declaringTypeName,
                 frame.GetMethod().Name,
                 GetParameters(frame.GetMethod()),
                 GetRelativePath(frame.GetFileName()),
@@ -187,10 +198,11 @@ namespace JLXB.Framework.LogSystem
         private string TrackFormatting(StackTrace stackTrace)
         {
             StringBuilder builder = new(120);
-            foreach (var item in stackTrace.GetFrames())
+            foreach (var item in stackTrace.GetFrames()!)
             {
                 builder.Append(TrackBriefness(item)).Append("\r\n");
             }
+
             return builder.ToString();
         }
 
@@ -212,6 +224,7 @@ namespace JLXB.Framework.LogSystem
             {
                 builder.Append(e.StackTrace);
             }
+
             return builder.ToString();
         }
 
