@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using JLXB.Framework.LogSystem;
 using JLXB.Framework.Asset;
@@ -10,6 +8,7 @@ public class StartUp : MonoBehaviour
     {
         LogSystem.Instance.Init();
         Log.Info("StartUp");
+        AudioMgr.Instance.Init();
     }
 
     private void Start()
