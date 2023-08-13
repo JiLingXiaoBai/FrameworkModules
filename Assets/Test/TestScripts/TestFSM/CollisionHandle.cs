@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using JLXB.Framework.Event;
+using JLXB.Framework.EventCenter;
 
 public class CollisionHandle : MonoBehaviour
 {

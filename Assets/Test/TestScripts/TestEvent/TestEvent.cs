@@ -1,5 +1,5 @@
 using UnityEngine;
-using JLXB.Framework.Event;
+using JLXB.Framework.EventCenter;
 
 public class TestEvent : MonoBehaviour
 {

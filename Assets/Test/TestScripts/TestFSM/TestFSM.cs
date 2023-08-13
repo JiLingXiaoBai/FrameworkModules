@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using JLXB.Framework.FSM;
-using JLXB.Framework.Event;
+using JLXB.Framework.EventCenter;
 
 public enum CharacterState
 {

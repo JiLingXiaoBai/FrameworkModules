@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
 
-namespace JLXB.Framework.Event
+namespace JLXB.Framework.EventCenter
 {
     public static class EventCenter
     {

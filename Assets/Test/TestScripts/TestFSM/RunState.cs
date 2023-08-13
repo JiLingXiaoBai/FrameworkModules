@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using JLXB.Framework.FSM;
-using JLXB.Framework.Event;
+using JLXB.Framework.EventCenter;
 using UnityEngine;
 
 public class RunState : StateBase<CharacterState>
