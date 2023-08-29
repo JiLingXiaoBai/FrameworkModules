@@ -1,0 +1,14 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using Only1Games.GDBA;
+
+// GameDataTableOutTemplate
+public class $GameDataTable$ : GameDataTable<$GameDataTable$.Data>
+{	
+	[System.Serializable]
+	public class Data : GameData
+	{
+		$Types$
+	}
+}

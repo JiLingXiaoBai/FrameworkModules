@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace Editor
+namespace JLXB.Framework.Editor
 {
     public class AssetProcessSetting : AssetPostprocessor
     {
