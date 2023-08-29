@@ -1,6 +1,7 @@
 using UnityEngine;
 using JLXB.Framework.LogSystem;
 using JLXB.Framework.Asset;
+using JLXB.Framework.Audio;
 using UnityEngine.SceneManagement;
 public class StartUp : MonoBehaviour
 {

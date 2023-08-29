@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using OfficeOpenXml;
 
-namespace JLXB.Framework.Editor.ExcelDataImporter
+namespace JLXB.Framework.GameDataBase.Editor
 {
     public abstract class CustomExcelDataImportBase
     {

@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Codice.CM.SEIDInfo;
 using UnityEditor;
 using UnityEngine;
 using OfficeOpenXml;
 
-namespace JLXB.Framework.Editor.ExcelDataImporter
+namespace JLXB.Framework.GameDataBase.Editor
 {
     public class ExcelDataImporter : EditorWindow
     {
@@ -19,6 +20,16 @@ namespace JLXB.Framework.Editor.ExcelDataImporter
         private string _className = string.Empty;
         private string _assetPath = string.Empty;
         private const string SaveKeyPrefix = "excel-importer-maker.";
+        private const string BoolType = "bool";
+        private const string StringType = "string";
+        private const string IntType = "int";
+        private const string UIntType = "uint";
+        private const string ShortType = "short";
+        private const string UShortType = "ushort";
+        private const string LongType = "long";
+        private const string ULongType = "ulong";
+        private const string FloatType = "float";
+        private const string DoubleType = "double";
         private List<ExcelRowParameter> _typeList = new();
         
         private enum ValueType

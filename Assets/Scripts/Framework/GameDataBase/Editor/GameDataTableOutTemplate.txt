@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Only1Games.GDBA;
+using JLXB.Framework.GameDataBase;
 
 // GameDataTableOutTemplate
 public class $GameDataTable$ : GameDataTable<$GameDataTable$.Data>
