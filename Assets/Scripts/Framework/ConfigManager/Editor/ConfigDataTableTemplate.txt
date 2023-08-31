@@ -1,0 +1,10 @@
+using JLXB.Framework.Config;
+
+public class $ConfigDataTable$ : ConfigDataTable<$TKey$, $ConfigDataTable$.ConfigData>
+{
+    [System.Serializable]
+    public class ConfigData : ConfigDataBase
+    {
+$Content$
+    }
+}
