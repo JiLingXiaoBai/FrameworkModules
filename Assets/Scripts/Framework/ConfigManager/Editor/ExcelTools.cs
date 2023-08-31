@@ -129,24 +129,21 @@ namespace JLXB.Framework.Config.Editor
             
             foreach (var excelPath in _excelList.Select(path => Path.Combine(_pathRoot, path)))
             {
-                if (CreateClass(excelPath, classesFolderPath))
-                    CreateScriptableObject();
-                else
-                    continue;
+                var fileInfo = new FileInfo(excelPath);
+                var columnInfos = GetColumnInfos(fileInfo);
+                if (columnInfos == null) continue;
+                var className = Path.GetFileNameWithoutExtension(fileInfo.Name);
+                CreateClass(className, classesFolderPath, columnInfos);
+                CreateScriptableObject();
                 AssetDatabase.Refresh();
             }
             
             _instance.Close();
         }
 
-        private static bool CreateClass(string excelPath, string classesFolderPath)
+        private static void CreateClass(string className, string classesFolderPath, List<ColumnInfo> columnInfos)
         {
-            var fileInfo = new FileInfo(excelPath);
-            var className = Path.GetFileNameWithoutExtension(fileInfo.Name);
             var classPath = Path.Combine(classesFolderPath, string.Concat(className, ".cs"));
-            var columnInfos = GetColumnInfos(fileInfo);
-            if (columnInfos == null) return false;
-            
             if (File.Exists(classPath))
             {
                 File.Delete(classPath);
@@ -172,7 +169,6 @@ namespace JLXB.Framework.Config.Editor
             templateFile = templateFile.Replace("$TKey$", keyType);
             templateFile = templateFile.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
             File.WriteAllText(classPath, templateFile);
-            return true;
         }
 
         private static List<ColumnInfo> GetColumnInfos(FileInfo fileInfo)
