@@ -1,12 +1,15 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using OfficeOpenXml;
+using UnityEditor.Callbacks;
 
 namespace JLXB.Framework.Config.Editor
 {
@@ -32,17 +35,7 @@ namespace JLXB.Framework.Config.Editor
         /// </summary>
         private static Vector2 _scrollPos;
         
-        /// <summary>
-        /// 列信息容器
-        /// </summary>
-        [Serializable]
-        private class ColumnInfo
-        {
-            public string name;
-            public string description;
-            public string type;
-            public List<string> dataList;
-        }
+        private const string SaveCacheKey = "excel-to-scriptable-tool";
 
         [MenuItem("Tools/ExcelTools")]
         private static void ShowExcelTools()
@@ -60,7 +53,7 @@ namespace JLXB.Framework.Config.Editor
             _pathRoot = Application.dataPath;
             _pathRoot = _pathRoot[.._pathRoot.LastIndexOf("/", StringComparison.Ordinal)];
             _excelList = new List<string>();
-            _scrollPos = new Vector2(_instance.position.x,_instance.position.y+75);
+            _scrollPos = new Vector2(_instance.position.x, _instance.position.y + 75);
         }
 
         private static void LoadExcel()
@@ -104,6 +97,7 @@ namespace JLXB.Framework.Config.Editor
                     GUILayout.Toggle(true, item);
                     GUILayout.EndHorizontal();
                 }
+
                 GUILayout.EndScrollView();
                 GUILayout.EndVertical();
                 if (GUILayout.Button("Convert"))
@@ -115,60 +109,47 @@ namespace JLXB.Framework.Config.Editor
 
         private static void Convert()
         {
+            if (EditorPrefs.HasKey(SaveCacheKey))
+                EditorPrefs.DeleteKey(SaveCacheKey);
+            
             var classesFolderPath = Path.Combine(Application.dataPath, "Config", "Classes");
             if (!Directory.Exists(classesFolderPath))
             {
                 Directory.CreateDirectory(classesFolderPath);
             }
-            
-            var assetsFolderPath = Path.Combine(Application.dataPath, "Config", "Data");
-            if (!Directory.Exists(assetsFolderPath))
-            {
-                Directory.CreateDirectory(assetsFolderPath);
-            }
-            
+
+            Dictionary<string, List<ColumnInfo>> cacheInfos = new();
             foreach (var excelPath in _excelList.Select(path => Path.Combine(_pathRoot, path)))
             {
                 var fileInfo = new FileInfo(excelPath);
                 var columnInfos = GetColumnInfos(fileInfo);
                 if (columnInfos == null) continue;
-                var className = Path.GetFileNameWithoutExtension(fileInfo.Name);
-                CreateClass(className, classesFolderPath, columnInfos);
-                CreateScriptableObject();
-                AssetDatabase.Refresh();
-            }
-            
-            _instance.Close();
-        }
+                var fileName = Path.GetFileNameWithoutExtension(fileInfo.Name);
+                if (!cacheInfos.ContainsKey(fileName))
+                    cacheInfos.Add(fileName, columnInfos);
+                else
+                {
+                    Debug.LogError($"Excels can not have the same name as {fileName}");
+                    continue;
+                }
 
-        private static void CreateClass(string className, string classesFolderPath, List<ColumnInfo> columnInfos)
-        {
-            var classPath = Path.Combine(classesFolderPath, string.Concat(className, ".cs"));
-            if (File.Exists(classPath))
-            {
-                File.Delete(classPath);
+                CreateClass(fileName, classesFolderPath, columnInfos);
             }
-            
-            StringBuilder content = new();
-            const string prefix = "\t\t";
-            var keyType = columnInfos[0].type;
-            
-            foreach (var info in columnInfos)
+            var cachePath = Path.Combine("Assets", "Config", "Editor", "Cache.asset");
+            if (File.Exists(cachePath))
             {
-                content.AppendLine($"{prefix}/// <summary>");
-                content.AppendLine($"{prefix}/// {info.description}");
-                content.AppendLine($"{prefix}/// </summary>");
-                content.AppendLine($"{prefix}public {info.type} {info.name};");
+                File.Delete(cachePath);
             }
-            
-            var guids = AssetDatabase.FindAssets("ConfigDataTableTemplate");
-            var templateFilePath = AssetDatabase.GUIDToAssetPath(guids[0]);
-            var templateFile = File.ReadAllText(templateFilePath);
-            templateFile = templateFile.Replace("$Content$", content.ToString());
-            templateFile = templateFile.Replace("$ConfigDataTable$", className);
-            templateFile = templateFile.Replace("$TKey$", keyType);
-            templateFile = templateFile.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
-            File.WriteAllText(classPath, templateFile);
+            var cacheAsset = CreateInstance(typeof(ColumnInfoCache));
+            AssetDatabase.CreateAsset(cacheAsset, cachePath);
+            cacheAsset.hideFlags = HideFlags.NotEditable;
+            var cacheMember = typeof(ColumnInfoCache).GetMember("Cache")[0];
+            ((FieldInfo)cacheMember).SetValue(cacheAsset, cacheInfos);
+            EditorUtility.SetDirty(cacheAsset);
+            EditorPrefs.SetString(SaveCacheKey, cachePath);
+            AssetDatabase.Refresh();
+            UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
+            _instance.Close();
         }
 
         private static List<ColumnInfo> GetColumnInfos(FileInfo fileInfo)
@@ -187,9 +168,16 @@ namespace JLXB.Framework.Config.Editor
                     switch (i)
                     {
                         case 1:
-                            if (strValue.Length < 2 || strValue.StartsWith("#"))
-                                continue;
-                            infos.Add(new ColumnInfo{name = GetFirstLowerName(strValue), dataList = new List<string>()});
+                            if (strValue.Length < 2 || strValue.StartsWith("#")) continue;
+                            var nameStr = GetFirstLowerName(strValue);
+                            if (infos.Any(info => info.name == nameStr))
+                            {
+                                Debug.LogError($"Error Name Define At {fileInfo.Name}, [{i},{j}]");
+                                return null;
+                            }
+
+                            infos.Add(new ColumnInfo
+                                { name = nameStr, dataList = new List<string>() });
                             break;
                         case 2:
                             var typeStr = GetTypeStr(strValue);
@@ -198,6 +186,7 @@ namespace JLXB.Framework.Config.Editor
                                 Debug.LogError($"Error Type Define At {fileInfo.Name}, [{i},{j}]");
                                 return null;
                             }
+
                             infos[j - 1].type = typeStr;
                             break;
                         case 3:
@@ -209,6 +198,7 @@ namespace JLXB.Framework.Config.Editor
                     }
                 }
             }
+
             return infos;
         }
 
@@ -230,18 +220,204 @@ namespace JLXB.Framework.Config.Editor
                 case "float[]":
                 case "double[]":
                 case "bool[]":
-                case "string[]":    
+                case "string[]":
                     return type;
                 default:
                     return null;
             }
         }
-
-        private static void CreateScriptableObject()
-        {
-            
-        }
         
+        
+
+        private static void CreateClass(string className, string classesFolderPath, List<ColumnInfo> columnInfos)
+        {
+            var classPath = Path.Combine(classesFolderPath, string.Concat(className, ".cs"));
+            if (File.Exists(classPath))
+            {
+                File.Delete(classPath);
+            }
+
+            StringBuilder content = new();
+            const string prefix = "\t\t";
+            var keyType = columnInfos[0].type;
+
+            foreach (var info in columnInfos)
+            {
+                content.AppendLine($"{prefix}/// <summary>");
+                content.AppendLine($"{prefix}/// {info.description}");
+                content.AppendLine($"{prefix}/// </summary>");
+                content.AppendLine($"{prefix}public {info.type} {info.name};");
+            }
+
+            var guids = AssetDatabase.FindAssets("ConfigDataTableTemplate");
+            var templateFilePath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            var templateFile = File.ReadAllText(templateFilePath);
+            templateFile = templateFile.Replace("$Content$", content.ToString());
+            templateFile = templateFile.Replace("$ConfigDataTable$", className);
+            templateFile = templateFile.Replace("$TKey$", keyType);
+            templateFile = templateFile.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
+            File.WriteAllText(classPath, templateFile);
+        }
+
+        [DidReloadScripts]
+        private static void OnReload()
+        {
+            if (!EditorPrefs.HasKey(SaveCacheKey)) return;
+            var cachePath = EditorPrefs.GetString(SaveCacheKey);
+            EditorPrefs.DeleteKey(SaveCacheKey);
+            CreateAllScriptableObjects(cachePath);
+            File.Delete(cachePath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+
+        private static void CreateAllScriptableObjects(string cachePath)
+        {
+            var cacheAsset = AssetDatabase.LoadAssetAtPath<ColumnInfoCache>(cachePath);
+            if (cacheAsset == null)
+            {
+                Debug.LogError("Can not find Cache Asset");
+                return;
+            }
+            var assetsFolderPath = Path.Combine(Application.dataPath, "Config", "Data");
+            if (!Directory.Exists(assetsFolderPath))
+            {
+                Directory.CreateDirectory(assetsFolderPath);
+            }
+            
+            Debug.Log("cacheInfos Count" + cacheAsset.Cache.Count);
+            
+            foreach (var item in cacheAsset.Cache)
+            {
+                CreateScriptableObject(item.Key, assetsFolderPath, item.Value);
+            }
+        }
+
+        private static void CreateScriptableObject(string assetName, string assetsFolderPath,
+            List<ColumnInfo> columnInfos)
+        {
+            var assetType = Type.GetType(string.Concat(assetName, ", Assembly-CSharp"));
+            var assetConfigDataType = Type.GetType(string.Concat(assetName, "+ConfigData, Assembly-CSharp"));
+            if (assetType == null)
+            {
+                Debug.LogError($"Can not get type of {assetName}");
+                return;
+            }
+
+            if (assetConfigDataType == null)
+            {
+                Debug.LogError($"Can not get configDataType of {assetName}");
+                return;
+            }
+
+            var assetPath = Path.Combine(assetsFolderPath, string.Concat(assetName, ".asset"));
+            if (File.Exists(assetPath))
+            {
+                File.Delete(assetPath);
+            }
+
+            var asset = CreateInstance(assetType);
+            AssetDatabase.CreateAsset(asset, assetPath);
+            var config = assetType.GetMember("config")[0];
+            SetConfigValue(config, assetConfigDataType, columnInfos, asset);
+            asset.hideFlags = HideFlags.NotEditable;
+            EditorUtility.SetDirty(asset);
+        }
+
+        private static void SetConfigValue(MemberInfo config, Type assetConfigDataType, List<ColumnInfo> columnInfos,
+            ScriptableObject asset)
+        {
+            var rowCount = columnInfos[0].dataList.Count;
+            var keyMemberInfo = assetConfigDataType.GetMember(columnInfos[0].name)[0];
+            var keyType = ((FieldInfo)keyMemberInfo).FieldType;
+            var dictType = ((FieldInfo)config).FieldType;
+            var dict = (IDictionary)Activator.CreateInstance(dictType);
+            for (var i = 0; i < rowCount; i++)
+            {
+                var key = Activator.CreateInstance(keyType);
+                var param = Activator.CreateInstance(assetConfigDataType);
+                ((FieldInfo)keyMemberInfo).SetValue(key,
+                    GetValueByStr(columnInfos[0].type, columnInfos[0].dataList[i]));
+                foreach (var info in columnInfos)
+                {
+                    var memberInfo = assetConfigDataType.GetMember(info.name)[0];
+                    ((FieldInfo)memberInfo).SetValue(param, GetValueByStr(info.type, info.dataList[i]));
+                }
+
+                dict.Add(key, param);
+            }
+
+            ((FieldInfo)config).SetValue(asset, dict);
+        }
+
+
+        private static object GetValueByStr(string type, string value)
+        {
+            if (value == null) return null;
+
+            switch (type)
+            {
+                case "int":
+                    return int.Parse(value);
+                case "float":
+                    return float.Parse(value);
+                case "double":
+                    return double.Parse(value);
+                case "bool":
+                    return value switch
+                    {
+                        "false" or "False" => false,
+                        "true" or "True" => true,
+                        _ => null
+                    };
+                case "string":
+                    return value;
+                case "int[]":
+                    var intStrArr = value.Split('|');
+                    var intArrRes = new int[intStrArr.Length];
+                    for (var i = 0; i < intStrArr.Length; i++)
+                    {
+                        intArrRes[i] = int.Parse(intStrArr[i]);
+                    }
+
+                    return intArrRes;
+                case "float[]":
+                    var floatStrArr = value.Split('|');
+                    var floatArrRes = new float[floatStrArr.Length];
+                    for (var i = 0; i < floatStrArr.Length; i++)
+                    {
+                        floatArrRes[i] = float.Parse(floatStrArr[i]);
+                    }
+
+                    return floatArrRes;
+                case "double[]":
+                    var doubleStrArr = value.Split('|');
+                    var doubleArrRes = new double[doubleStrArr.Length];
+                    for (var i = 0; i < doubleStrArr.Length; i++)
+                    {
+                        doubleArrRes[i] = double.Parse(doubleStrArr[i]);
+                    }
+
+                    return doubleArrRes;
+                case "bool[]":
+                    var boolStrArr = value.Split('|');
+                    var boolArrRes = new bool[boolStrArr.Length];
+                    for (var i = 0; i < boolStrArr.Length; i++)
+                    {
+                        boolArrRes[i] = boolStrArr[i] switch
+                        {
+                            "true" or "True" => true,
+                            "false" or "False" => false,
+                            _ => false
+                        };
+                    }
+
+                    return boolArrRes;
+                case "string[]":
+                    return value.Split('|');
+                default:
+                    return null;
+            }
+        }
     }
-    
 }
