@@ -34,7 +34,7 @@ namespace JLXB.Framework.Config.Editor
         /// 滚动窗口初始位置
         /// </summary>
         private static Vector2 _scrollPos;
-        
+
         private const string SaveCacheKey = "excel-to-scriptable-tool";
 
         [MenuItem("Tools/ExcelTools")]
@@ -111,14 +111,14 @@ namespace JLXB.Framework.Config.Editor
         {
             if (EditorPrefs.HasKey(SaveCacheKey))
                 EditorPrefs.DeleteKey(SaveCacheKey);
-            
+
             var classesFolderPath = Path.Combine(Application.dataPath, "Config", "Classes");
             if (!Directory.Exists(classesFolderPath))
             {
                 Directory.CreateDirectory(classesFolderPath);
             }
 
-            Dictionary<string, List<ColumnInfo>> cacheInfos = new();
+            Dictionary<string, ColumnInfoCache.ConfigData> cacheInfos = new();
             foreach (var excelPath in _excelList.Select(path => Path.Combine(_pathRoot, path)))
             {
                 var fileInfo = new FileInfo(excelPath);
@@ -126,7 +126,7 @@ namespace JLXB.Framework.Config.Editor
                 if (columnInfos == null) continue;
                 var fileName = Path.GetFileNameWithoutExtension(fileInfo.Name);
                 if (!cacheInfos.ContainsKey(fileName))
-                    cacheInfos.Add(fileName, columnInfos);
+                    cacheInfos.Add(fileName, new ColumnInfoCache.ConfigData(columnInfos));
                 else
                 {
                     Debug.LogError($"Excels can not have the same name as {fileName}");
@@ -135,16 +135,24 @@ namespace JLXB.Framework.Config.Editor
 
                 CreateClass(fileName, classesFolderPath, columnInfos);
             }
-            var cachePath = Path.Combine("Assets", "Config", "Editor", "Cache.asset");
-            if (File.Exists(cachePath))
+
+            var cachePath = Path.Combine("Assets", "Config", "Editor", "Excel_Import_Cache.asset");
+            
+            if (AssetDatabase.FindAssets("Excel_Import_Cache").Length > 0)
             {
-                File.Delete(cachePath);
+                AssetDatabase.DeleteAsset(cachePath);
             }
+
             var cacheAsset = CreateInstance(typeof(ColumnInfoCache));
             AssetDatabase.CreateAsset(cacheAsset, cachePath);
             cacheAsset.hideFlags = HideFlags.NotEditable;
-            var cacheMember = typeof(ColumnInfoCache).GetMember("Cache")[0];
-            ((FieldInfo)cacheMember).SetValue(cacheAsset, cacheInfos);
+            var baseType = typeof(ColumnInfoCache).BaseType;
+            if (baseType != null)
+            {
+                var config = baseType.GetField("_config", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (config != null) config.SetValue(cacheAsset, cacheInfos);
+            }
+
             EditorUtility.SetDirty(cacheAsset);
             EditorPrefs.SetString(SaveCacheKey, cachePath);
             AssetDatabase.Refresh();
@@ -226,17 +234,12 @@ namespace JLXB.Framework.Config.Editor
                     return null;
             }
         }
-        
-        
+
 
         private static void CreateClass(string className, string classesFolderPath, List<ColumnInfo> columnInfos)
         {
             var classPath = Path.Combine(classesFolderPath, string.Concat(className, ".cs"));
-            if (File.Exists(classPath))
-            {
-                File.Delete(classPath);
-            }
-
+            
             StringBuilder content = new();
             const string prefix = "\t\t";
             var keyType = columnInfos[0].type;
@@ -266,8 +269,11 @@ namespace JLXB.Framework.Config.Editor
             var cachePath = EditorPrefs.GetString(SaveCacheKey);
             EditorPrefs.DeleteKey(SaveCacheKey);
             CreateAllScriptableObjects(cachePath);
-            File.Delete(cachePath);
             AssetDatabase.SaveAssets();
+            if (AssetDatabase.FindAssets("Excel_Import_Cache").Length > 0)
+            {
+                AssetDatabase.DeleteAsset(cachePath);
+            }
             AssetDatabase.Refresh();
         }
 
@@ -279,22 +285,20 @@ namespace JLXB.Framework.Config.Editor
                 Debug.LogError("Can not find Cache Asset");
                 return;
             }
+
             var assetsFolderPath = Path.Combine(Application.dataPath, "Config", "Data");
             if (!Directory.Exists(assetsFolderPath))
             {
                 Directory.CreateDirectory(assetsFolderPath);
             }
-            
-            Debug.Log("cacheInfos Count" + cacheAsset.Cache.Count);
-            
-            foreach (var item in cacheAsset.Cache)
+
+            foreach (var item in cacheAsset.Config)
             {
-                CreateScriptableObject(item.Key, assetsFolderPath, item.Value);
+                CreateScriptableObject(item.Key, item.Value.cacheInfo);
             }
         }
 
-        private static void CreateScriptableObject(string assetName, string assetsFolderPath,
-            List<ColumnInfo> columnInfos)
+        private static void CreateScriptableObject(string assetName, List<ColumnInfo> columnInfos)
         {
             var assetType = Type.GetType(string.Concat(assetName, ", Assembly-CSharp"));
             var assetConfigDataType = Type.GetType(string.Concat(assetName, "+ConfigData, Assembly-CSharp"));
@@ -310,17 +314,22 @@ namespace JLXB.Framework.Config.Editor
                 return;
             }
 
-            var assetPath = Path.Combine(assetsFolderPath, string.Concat(assetName, ".asset"));
-            if (File.Exists(assetPath))
+            var assetPath = Path.Combine("Assets", "Config", "Data", string.Concat(assetName, ".asset"));
+            if (AssetDatabase.FindAssets(assetName).Length > 0)
             {
-                File.Delete(assetPath);
+                AssetDatabase.DeleteAsset(assetPath);
             }
 
             var asset = CreateInstance(assetType);
             AssetDatabase.CreateAsset(asset, assetPath);
-            var config = assetType.GetMember("config")[0];
-            SetConfigValue(config, assetConfigDataType, columnInfos, asset);
             asset.hideFlags = HideFlags.NotEditable;
+            var baseType = assetType.BaseType;
+            if (baseType != null)
+            {
+                var config = baseType.GetField("_config", BindingFlags.NonPublic | BindingFlags.Instance);
+                SetConfigValue(config, assetConfigDataType, columnInfos, asset);
+            }
+
             EditorUtility.SetDirty(asset);
         }
 
@@ -328,16 +337,12 @@ namespace JLXB.Framework.Config.Editor
             ScriptableObject asset)
         {
             var rowCount = columnInfos[0].dataList.Count;
-            var keyMemberInfo = assetConfigDataType.GetMember(columnInfos[0].name)[0];
-            var keyType = ((FieldInfo)keyMemberInfo).FieldType;
             var dictType = ((FieldInfo)config).FieldType;
             var dict = (IDictionary)Activator.CreateInstance(dictType);
             for (var i = 0; i < rowCount; i++)
             {
-                var key = Activator.CreateInstance(keyType);
+                var key = GetValueByStr(columnInfos[0].type, columnInfos[0].dataList[i]);
                 var param = Activator.CreateInstance(assetConfigDataType);
-                ((FieldInfo)keyMemberInfo).SetValue(key,
-                    GetValueByStr(columnInfos[0].type, columnInfos[0].dataList[i]));
                 foreach (var info in columnInfos)
                 {
                     var memberInfo = assetConfigDataType.GetMember(info.name)[0];

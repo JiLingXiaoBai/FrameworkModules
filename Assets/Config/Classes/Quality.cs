@@ -1,6 +1,6 @@
 using JLXB.Framework.Config;
 
-public class Quality : ConfigDataTable<int, Quality.ConfigData>
+public sealed class Quality : ConfigDataTable<int, Quality.ConfigData>
 {
     [System.Serializable]
     public class ConfigData : ConfigDataBase

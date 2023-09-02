@@ -1,14 +1,21 @@
 
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace JLXB.Framework.Config.Editor
 {
-    [Serializable]
-    public class ColumnInfoCache : ScriptableObject
+    public sealed class ColumnInfoCache : ConfigDataTable<string, ColumnInfoCache.ConfigData>
     {
-        public Dictionary<string, List<ColumnInfo>> Cache;
+        [Serializable]
+        public class ConfigData : ConfigDataBase
+        {
+            public List<ColumnInfo> cacheInfo;
+            public ConfigData(List<ColumnInfo> cacheInfo)
+            {
+                this.cacheInfo = cacheInfo;
+            }
+        }
+        
     }
     
     /// <summary>
