@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using OfficeOpenXml;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Callbacks;
 
 namespace JLXB.Framework.Config.Editor
@@ -118,6 +120,12 @@ namespace JLXB.Framework.Config.Editor
                 Directory.CreateDirectory(classesFolderPath);
             }
 
+            var assetsFolderPath = Path.Combine(Application.dataPath, "Config", "Data");
+            if (!Directory.Exists(assetsFolderPath))
+            {
+                Directory.CreateDirectory(assetsFolderPath);
+            }
+
             Dictionary<string, ColumnInfoCache.ConfigData> cacheInfos = new();
             foreach (var excelPath in _excelList.Select(path => Path.Combine(_pathRoot, path)))
             {
@@ -136,11 +144,12 @@ namespace JLXB.Framework.Config.Editor
                 CreateClass(fileName, classesFolderPath, columnInfos);
             }
 
-            var cachePath = Path.Combine("Assets", "Config", "Editor", "Excel_Import_Cache.asset");
-            
+            var cachePath = Path.Combine("Assets", "Config", "Data", "Excel_Import_Cache.asset");
+
             if (AssetDatabase.FindAssets("Excel_Import_Cache").Length > 0)
             {
                 AssetDatabase.DeleteAsset(cachePath);
+                AssetDatabase.Refresh();
             }
 
             var cacheAsset = CreateInstance(typeof(ColumnInfoCache));
@@ -154,8 +163,9 @@ namespace JLXB.Framework.Config.Editor
             }
 
             EditorUtility.SetDirty(cacheAsset);
-            EditorPrefs.SetString(SaveCacheKey, cachePath);
+            AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            EditorPrefs.SetString(SaveCacheKey, cachePath);
             UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
             _instance.Close();
         }
@@ -239,7 +249,7 @@ namespace JLXB.Framework.Config.Editor
         private static void CreateClass(string className, string classesFolderPath, List<ColumnInfo> columnInfos)
         {
             var classPath = Path.Combine(classesFolderPath, string.Concat(className, ".cs"));
-            
+
             StringBuilder content = new();
             const string prefix = "\t\t";
             var keyType = columnInfos[0].type;
@@ -269,7 +279,7 @@ namespace JLXB.Framework.Config.Editor
             var cachePath = EditorPrefs.GetString(SaveCacheKey);
             EditorPrefs.DeleteKey(SaveCacheKey);
             CreateAllScriptableObjects(cachePath);
-            AssetDatabase.SaveAssets();
+            
             if (AssetDatabase.FindAssets("Excel_Import_Cache").Length > 0)
             {
                 AssetDatabase.DeleteAsset(cachePath);
@@ -286,42 +296,45 @@ namespace JLXB.Framework.Config.Editor
                 return;
             }
 
-            var assetsFolderPath = Path.Combine(Application.dataPath, "Config", "Data");
-            if (!Directory.Exists(assetsFolderPath))
-            {
-                Directory.CreateDirectory(assetsFolderPath);
-            }
-
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            var group = GetConfigAddressableGroup(settings, "ExcelConfigDataGroup");
             foreach (var item in cacheAsset.Config)
             {
-                CreateScriptableObject(item.Key, item.Value.cacheInfo);
+                var assetPath = CreateScriptableObject(item.Key, item.Value.cacheInfo);
+                if (assetPath != null)
+                {
+                    AddAssetToAddressable(assetPath, settings, group);
+                }
             }
+            EditorUtility.SetDirty(settings);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
 
-        private static void CreateScriptableObject(string assetName, List<ColumnInfo> columnInfos)
+        private static string CreateScriptableObject(string assetName, List<ColumnInfo> columnInfos)
         {
             var assetType = Type.GetType(string.Concat(assetName, ", Assembly-CSharp"));
             var assetConfigDataType = Type.GetType(string.Concat(assetName, "+ConfigData, Assembly-CSharp"));
             if (assetType == null)
             {
                 Debug.LogError($"Can not get type of {assetName}");
-                return;
+                return null;
             }
 
             if (assetConfigDataType == null)
             {
                 Debug.LogError($"Can not get configDataType of {assetName}");
-                return;
+                return null;
             }
 
             var assetPath = Path.Combine("Assets", "Config", "Data", string.Concat(assetName, ".asset"));
-            if (AssetDatabase.FindAssets(assetName).Length > 0)
+            if (AssetDatabase.AssetPathToGUID(assetPath) != null)
             {
                 AssetDatabase.DeleteAsset(assetPath);
+                AssetDatabase.Refresh();
             }
 
             var asset = CreateInstance(assetType);
-            AssetDatabase.CreateAsset(asset, assetPath);
             asset.hideFlags = HideFlags.NotEditable;
             var baseType = assetType.BaseType;
             if (baseType != null)
@@ -330,7 +343,11 @@ namespace JLXB.Framework.Config.Editor
                 SetConfigValue(config, assetConfigDataType, columnInfos, asset);
             }
 
+            AssetDatabase.CreateAsset(asset, assetPath);
             EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            return assetPath;
         }
 
         private static void SetConfigValue(MemberInfo config, Type assetConfigDataType, List<ColumnInfo> columnInfos,
@@ -423,6 +440,34 @@ namespace JLXB.Framework.Config.Editor
                 default:
                     return null;
             }
+        }
+
+        private static AddressableAssetGroup GetConfigAddressableGroup(AddressableAssetSettings settings,
+            string groupName)
+        {
+            var group = settings.FindGroup(groupName);
+            if (group == null)
+            {
+                group = CreateAssetGroup(settings, groupName);
+            }
+
+            return group;
+        }
+
+        private static void AddAssetToAddressable(string assetPath, AddressableAssetSettings settings,
+            AddressableAssetGroup group)
+        {
+            var guid = AssetDatabase.AssetPathToGUID(assetPath);
+            var entry = settings.CreateOrMoveEntry(guid, group);
+            entry.address = string.Concat("ExcelConfigData/", Path.GetFileNameWithoutExtension(assetPath));
+            entry.SetLabel("ExcelConfigData", true, true);
+        }
+
+        private static AddressableAssetGroup CreateAssetGroup(AddressableAssetSettings settings, string groupName)
+        {
+            var tempSchemaList = new List<AddressableAssetGroupSchema>
+                { settings.DefaultGroup.Schemas[0], settings.DefaultGroup.Schemas[1] };
+            return settings.CreateGroup(groupName, false, false, false, tempSchemaList, typeof(ScriptableObject));
         }
     }
 }

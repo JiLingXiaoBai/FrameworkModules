@@ -6,24 +6,23 @@ namespace JLXB.Framework.Config
     [System.Serializable]
     public class ConfigDataBase
     {
-        
     }
 
-    public class ConfigDataTable<TKey,TValue> : ScriptableObject, ISerializationCallbackReceiver where TValue : ConfigDataBase
+    public class ConfigDataTable<TKey, TValue> : ScriptableObject, ISerializationCallbackReceiver
+        where TValue : ConfigDataBase
     {
-        
         private Dictionary<TKey, TValue> _config;
 
         [SerializeField] private TKey[] keys;
 
         [SerializeField] private TValue[] values;
-        
+
         public void OnBeforeSerialize()
         {
             if (_config == null) return;
             keys = new TKey[_config.Count];
             values = new TValue[_config.Count];
-            
+
             var index = 0;
             foreach (var item in _config)
             {
@@ -42,11 +41,13 @@ namespace JLXB.Framework.Config
             {
                 _config[keys[i]] = values[i];
             }
+
+            keys = null;
+            values = null;
         }
-        
+
         public IReadOnlyDictionary<TKey, TValue> Config => _config;
-        
+
         public int Count => _config.Count;
-        
     }
 }

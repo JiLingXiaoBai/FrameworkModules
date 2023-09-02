@@ -26,9 +26,9 @@ namespace JLXB.Framework.Asset
                 }
                 else
                 {
-                    handle.Completed += (handle) =>
+                    handle.Completed += (operationHandle) =>
                     {
-                        if (handle.Status == AsyncOperationStatus.Succeeded)
+                        if (operationHandle.Status == AsyncOperationStatus.Succeeded)
                         {
                             callback?.Invoke(_caches[key].Convert<T>().Result);
                             if (autoRelease)
@@ -36,7 +36,7 @@ namespace JLXB.Framework.Asset
                         }
                         else
                         {
-                            throw new Exception(string.Format("加载资源失败 key = {0}", key));
+                            throw new Exception($"加载资源失败 key = {key}");
                         }
                     };
                 }
@@ -44,17 +44,17 @@ namespace JLXB.Framework.Asset
             else
             {
                 var handle = Addressables.LoadAssetAsync<T>(key);
-                handle.Completed += (handle) =>
+                handle.Completed += (operationHandle) =>
                 {
-                    if (handle.Status == AsyncOperationStatus.Succeeded)
+                    if (operationHandle.Status == AsyncOperationStatus.Succeeded)
                     {
-                        callback?.Invoke(handle.Result);
+                        callback?.Invoke(operationHandle.Result);
                         if (autoRelease)
                             ReleaseAsset(key);
                     }
                     else
                     {
-                        throw new Exception(string.Format("加载资源失败 key = {0}", key));
+                        throw new Exception($"加载资源失败 key = {key}");
                     }
 
                 };
@@ -69,7 +69,7 @@ namespace JLXB.Framework.Asset
                 var handle = _caches[label];
                 if (handle.IsDone)
                 {
-                    IList<T> list = _caches[label].Convert<IList<T>>().Result;
+                    var list = _caches[label].Convert<IList<T>>().Result;
                     foreach (var item in list)
                     {
                         callback?.Invoke(item);
@@ -77,9 +77,9 @@ namespace JLXB.Framework.Asset
                 }
                 else
                 {
-                    handle.Completed += (handle) =>
+                    handle.Completed += (operationHandle) =>
                     {
-                        if (handle.Status == AsyncOperationStatus.Succeeded)
+                        if (operationHandle.Status == AsyncOperationStatus.Succeeded)
                         {
                             callback?.Invoke(_caches[label].Convert<T>().Result);
                             if (autoRelease)
@@ -87,24 +87,24 @@ namespace JLXB.Framework.Asset
                         }
                         else
                         {
-                            throw new Exception(string.Format("加载资源失败 label = {0}", label));
+                            throw new Exception($"加载资源失败 label = {label}");
                         }
                     };
                 }
             }
             else
             {
-                var handle = Addressables.LoadAssetsAsync<T>(label, callback);
-                handle.Completed += (handle) =>
+                var handle = Addressables.LoadAssetsAsync(label, callback);
+                handle.Completed += (operationHandle) =>
                 {
-                    if (handle.Status == AsyncOperationStatus.Succeeded)
+                    if (operationHandle.Status == AsyncOperationStatus.Succeeded)
                     {
                         if (autoRelease)
                             ReleaseAsset(label);
                     }
                     else
                     {
-                        throw new Exception(string.Format("加载资源失败 label = {0}", label));
+                        throw new Exception($"加载资源失败 label = {label}");
                     }
 
                 };
@@ -114,11 +114,9 @@ namespace JLXB.Framework.Asset
 
         public void ReleaseAsset(string key)
         {
-            if (_caches.ContainsKey(key))
-            {
-                Addressables.Release(_caches[key]);
-                _caches.Remove(key);
-            }
+            if (!_caches.ContainsKey(key)) return;
+            Addressables.Release(_caches[key]);
+            _caches.Remove(key);
         }
 
         public void LoadSceneAsync(string sceneName, LoadSceneMode loadMode, bool activateOnLoad, UnityAction<float> loadAction = null, UnityAction<SceneInstance> finishAction = null)
@@ -144,28 +142,25 @@ namespace JLXB.Framework.Asset
             }
             else
             {
-                throw new Exception(string.Format("加载场景失败，sceneName = {0}", sceneName));
+                throw new Exception($"加载场景失败，sceneName = {sceneName}");
             }
-            yield break;
         }
 
         public void UnloadSceneAsync(string sceneName)
         {
-            if (_caches.ContainsKey(sceneName))
-            {
-                Addressables.UnloadSceneAsync(_caches[sceneName]);
-                _caches.Remove(sceneName);
-            }
+            if (!_caches.ContainsKey(sceneName)) return;
+            Addressables.UnloadSceneAsync(_caches[sceneName]);
+            _caches.Remove(sceneName);
         }
 
         public void InstantiateAsync(string key, UnityAction<GameObject> callback = null)
         {
             var handle = Addressables.InstantiateAsync(key);
-            handle.Completed += (handle) =>
+            handle.Completed += (operationHandle) =>
             {
-                if (handle.Status == AsyncOperationStatus.Succeeded)
+                if (operationHandle.Status == AsyncOperationStatus.Succeeded)
                 {
-                    callback?.Invoke(handle.Result);
+                    callback?.Invoke(operationHandle.Result);
                 }
             };
         }
@@ -173,11 +168,11 @@ namespace JLXB.Framework.Asset
         public void InstantiateAsync(string key, Vector3 position, Quaternion rotation, Transform parent = null, UnityAction<GameObject> callback = null)
         {
             var handle = Addressables.InstantiateAsync(key, position, rotation, parent);
-            handle.Completed += (handle) =>
+            handle.Completed += (operationHandle) =>
             {
-                if (handle.Status == AsyncOperationStatus.Succeeded)
+                if (operationHandle.Status == AsyncOperationStatus.Succeeded)
                 {
-                    callback?.Invoke(handle.Result);
+                    callback?.Invoke(operationHandle.Result);
                 }
             };
         }

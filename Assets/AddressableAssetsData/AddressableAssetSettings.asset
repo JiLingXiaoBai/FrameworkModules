@@ -46,6 +46,7 @@ MonoBehaviour:
   m_GroupAssets:
   - {fileID: 11400000, guid: 0096dca531896f143b437f69a1d8821c, type: 2}
   - {fileID: 11400000, guid: 56094feeb88da5e4b823b0e060293c01, type: 2}
+  - {fileID: 11400000, guid: f769593489286e84aa45953afc727f64, type: 2}
   m_BuildSettings:
     m_CompileScriptsInVirtualMode: 0
     m_CleanupStreamingAssetsAfterBuilds: 1
@@ -88,6 +89,7 @@ MonoBehaviour:
     m_LabelNames:
     - default
     - Test
+    - ExcelConfigData
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: cbcd362be465bea42a4e0941691f0a34, type: 2}
