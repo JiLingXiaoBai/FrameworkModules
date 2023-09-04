@@ -17,6 +17,8 @@ namespace JLXB.Framework.Config
         private bool _initFlag;
         public bool ConfigLoadCompleted { get; private set; }
 
+        private const string TypeEndStr = "+ConfigData";
+
         public void Init()
         {
             if (_initFlag) return;
@@ -40,7 +42,7 @@ namespace JLXB.Framework.Config
             };
         }
 
-        public IReadOnlyDictionary<TKey, TValue> GetConfig<TKey, TValue>(string configName)
+        public IReadOnlyDictionary<TKey, TValue> GetConfig<TKey, TValue>()
             where TValue : ConfigDataBase
         {
             if (!ConfigLoadCompleted)
@@ -48,7 +50,7 @@ namespace JLXB.Framework.Config
                 Debug.LogError("Excel config data has not been loaded");
                 return null;
             }
-
+            var configName = typeof(TValue).ToString()[..^TypeEndStr.Length];
             var hasConfig = _configDict.TryGetValue(configName, out var configObj);
             if (hasConfig)
             {

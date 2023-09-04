@@ -388,8 +388,8 @@ namespace JLXB.Framework.Config.Editor
                 case "bool":
                     return value switch
                     {
-                        "false" or "False" => false,
-                        "true" or "True" => true,
+                        "false" or "False" or "FALSE" => false,
+                        "true" or "True"or "TRUE" => true,
                         _ => null
                     };
                 case "string":

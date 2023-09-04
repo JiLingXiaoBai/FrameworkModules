@@ -6,9 +6,9 @@ public class TestConfig : MonoBehaviour
 {
     private void Start()
     {
-        var quality = ConfigMgr.Instance.GetConfig<int, Quality.ConfigData>("Quality");
+        var quality = ConfigMgr.Instance.GetConfig<string, Quality.ConfigData>();
         
-        Debug.Log(quality[4].color);
+        Debug.Log(quality["four"].color);
         
         foreach (var item in quality)
         {
