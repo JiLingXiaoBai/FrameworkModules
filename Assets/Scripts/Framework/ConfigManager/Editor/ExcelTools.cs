@@ -428,8 +428,8 @@ namespace JLXB.Framework.Config.Editor
                     {
                         boolArrRes[i] = boolStrArr[i] switch
                         {
-                            "true" or "True" => true,
-                            "false" or "False" => false,
+                            "true" or "True"or "TRUE" => true,
+                            "false" or "False" or "FALSE" => false,
                             _ => false
                         };
                     }
