@@ -9,6 +9,8 @@ namespace JLXB.Framework
     {
         private event UnityAction UpdateEvent;
         private event UnityAction DestroyEvent;
+        private event UnityAction EnableEvent;
+        private event UnityAction DisableEvent;
         private MonoBehaviour _mono;
         private MonoMgr() { }
         private void Awake()
@@ -16,19 +18,46 @@ namespace JLXB.Framework
             _mono = this;
         }
 
-        void Update()
+        private void OnEnable()
         {
-            if (UpdateEvent != null)
-            {
-                UpdateEvent?.Invoke();
-            }
+            EnableEvent?.Invoke();
         }
 
-        void OnDestroy()
+        private void Update()
+        {
+            UpdateEvent?.Invoke();
+        }
+
+        private void OnDisable()
+        {
+            DisableEvent?.Invoke();
+        }
+
+        private void OnDestroy()
         {
             DestroyEvent?.Invoke();
             DestroyEvent = null;
             UpdateEvent = null;
+            EnableEvent = null;
+            DisableEvent = null;
+        }
+        
+        public void AddEnableListener(UnityAction func)
+        {
+            EnableEvent += func;
+        }
+        public void RemoveEnableListener(UnityAction func)
+        {
+            EnableEvent -= func;
+        }
+        
+        public void AddDisableListener(UnityAction func)
+        {
+            DisableEvent += func;
+        }
+        public void RemoveDisableListener(UnityAction func)
+        {
+            DisableEvent -= func;
         }
 
         public void AddUpdateListener(UnityAction func)
