@@ -18,7 +18,7 @@ public enum SuperState
     CharacterAttack,
     Any
 }
-
+ 
 public class TestFSM : MonoBehaviour
 {
     [SerializeField] private Color dayColor;
