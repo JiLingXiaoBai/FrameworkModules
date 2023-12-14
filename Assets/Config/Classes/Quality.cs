@@ -1,4 +1,4 @@
-using JLXB.Framework.Config;
+using Tools.Config;
 
 public sealed class Quality : ConfigDataTable<string, Quality.ConfigData>
 {

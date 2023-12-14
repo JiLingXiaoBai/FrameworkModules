@@ -15,7 +15,7 @@ MonoBehaviour:
   m_GroupName: ExcelConfigDataGroup
   m_Data:
     m_SerializedData: []
-  m_GUID: db3af769e91925846bc9604d80c9a46a
+  m_GUID: 0800b160e9de6c34f8c19f4497bdcf78
   m_SerializeEntries:
   - m_GUID: 4fdd214ebab1ef046aa45324733f4e6b
     m_Address: ExcelConfigData/Quality

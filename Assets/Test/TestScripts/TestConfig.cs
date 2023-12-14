@@ -1,5 +1,4 @@
-using System;
-using JLXB.Framework.Config;
+using Tools.Config;
 using UnityEngine;
 
 public class TestConfig : MonoBehaviour
