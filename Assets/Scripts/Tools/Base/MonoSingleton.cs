@@ -21,6 +21,10 @@ namespace Tools
                         _instance = obj.AddComponent<T>();
                         DontDestroyOnLoad(obj);
                     }
+                    else
+                    {
+                        DontDestroyOnLoad(_instance.gameObject);
+                    }
                 }
 
                 return _instance;
