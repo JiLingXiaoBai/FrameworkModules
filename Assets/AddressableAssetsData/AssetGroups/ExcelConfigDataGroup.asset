@@ -17,7 +17,7 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 0800b160e9de6c34f8c19f4497bdcf78
   m_SerializeEntries:
-  - m_GUID: 4fdd214ebab1ef046aa45324733f4e6b
+  - m_GUID: d1ec79e50bcf7864b9d10144a007de8d
     m_Address: ExcelConfigData/Quality
     m_ReadOnly: 0
     m_SerializedLabels:

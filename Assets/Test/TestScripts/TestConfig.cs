@@ -1,4 +1,4 @@
-using Tools.Config;
+using XBToolKit.Config;
 using UnityEngine;
 
 public class TestConfig : MonoBehaviour

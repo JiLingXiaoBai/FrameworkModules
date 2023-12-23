@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Linq;
 using System;
 
-namespace Tools
+namespace XBToolKit
 {
     public abstract class MonoSingleton<T> : MonoBehaviour where T : Component
     {

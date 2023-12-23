@@ -13,7 +13,7 @@ using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Callbacks;
 
-namespace Tools.Config.Editor
+namespace XBToolKit.Config.Editor
 {
     public class ExcelTools : EditorWindow
     {

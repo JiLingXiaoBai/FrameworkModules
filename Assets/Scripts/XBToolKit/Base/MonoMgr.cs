@@ -3,7 +3,7 @@ using UnityEngine.Internal;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Tools
+namespace XBToolKit
 {
     public class MonoMgr : MonoSingleton<MonoMgr>
     {

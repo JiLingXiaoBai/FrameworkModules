@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace Tools.Config
+namespace XBToolKit.Config
 {
     public class ConfigMgr : Singleton<ConfigMgr>
     {

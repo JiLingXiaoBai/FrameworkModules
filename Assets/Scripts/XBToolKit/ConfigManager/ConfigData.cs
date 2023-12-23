@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Tools.Config
+namespace XBToolKit.Config
 {
     [System.Serializable]
     public class ConfigDataBase

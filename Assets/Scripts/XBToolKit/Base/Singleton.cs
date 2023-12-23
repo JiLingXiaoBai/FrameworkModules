@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using System.Linq;
 
-namespace Tools
+namespace XBToolKit
 {
     public abstract class Singleton<T> where T : class
     {

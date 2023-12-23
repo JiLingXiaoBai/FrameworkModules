@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Tools.Config.Editor
+namespace XBToolKit.Config.Editor
 {
     public sealed class ColumnInfoCache : ConfigDataTable<string, ColumnInfoCache.ConfigData>
     {

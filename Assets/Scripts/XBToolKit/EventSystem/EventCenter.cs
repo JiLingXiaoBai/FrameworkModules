@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
 
-namespace Tools.EventCenter
+namespace XBToolKit.EventCenter
 {
     public static class EventCenter
     {

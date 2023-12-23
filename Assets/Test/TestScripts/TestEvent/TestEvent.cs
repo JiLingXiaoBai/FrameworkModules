@@ -1,5 +1,5 @@
 using UnityEngine;
-using Tools.EventCenter;
+using XBToolKit.EventCenter;
 
 public class TestEvent : MonoBehaviour
 {
