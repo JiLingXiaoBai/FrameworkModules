@@ -16,16 +16,30 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 0800b160e9de6c34f8c19f4497bdcf78
-  m_SerializeEntries:
-  - m_GUID: d1ec79e50bcf7864b9d10144a007de8d
-    m_Address: ExcelConfigData/Quality
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - ExcelConfigData
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 9f011467b70623a4a8352d340d13a49a, type: 2}
   m_SchemaSet:
     m_Schemas:
     - {fileID: 11400000, guid: e322bb92c979fe6419d5816c38e1c6a5, type: 2}
     - {fileID: 11400000, guid: c11587a2574f1804a97bbe51348e9177, type: 2}
+  m_FolderEntryCache: []
+  m_AssetCollectionEntryCache: []
+  <FlaggedDuringContentUpdateRestriction>k__BackingField: 0
+  m_CurrentHash:
+    bytes[0]: 117
+    bytes[1]: 181
+    bytes[2]: 32
+    bytes[3]: 106
+    bytes[4]: 2
+    bytes[5]: 81
+    bytes[6]: 39
+    bytes[7]: 14
+    bytes[8]: 113
+    bytes[9]: 41
+    bytes[10]: 0
+    bytes[11]: 93
+    bytes[12]: 24
+    bytes[13]: 178
+    bytes[14]: 157
+    bytes[15]: 99
