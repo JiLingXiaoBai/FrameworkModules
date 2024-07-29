@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74c6d7235de44f8fb136007fcf5dc0b0, type: 3}
+  m_Name: New Mesh Font Table
+  m_EditorClassIdentifier: 
+  meshFonts:
+  - unicode: 48
+    sprite: {fileID: 575649639, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 49
+    sprite: {fileID: 1956489054, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 50
+    sprite: {fileID: 1681508677, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 51
+    sprite: {fileID: -1283787153, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 52
+    sprite: {fileID: -1099258834, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 53
+    sprite: {fileID: 987468571, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 54
+    sprite: {fileID: 593182217, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 55
+    sprite: {fileID: 1883387767, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 56
+    sprite: {fileID: -1641122008, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
+  - unicode: 57
+    sprite: {fileID: -1170270062, guid: 92a2cd02f7bfa884f9713903e96e8f8c, type: 3}
