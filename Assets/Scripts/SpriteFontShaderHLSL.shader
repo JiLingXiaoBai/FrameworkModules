@@ -55,16 +55,15 @@ Shader "Custom/SpriteFontShaderHLSL"
             v2f vert(appdata v)
             {
                 v2f o;
-                // float4 worldPos = mul(unity_ObjectToWorld, float4(0,0,0,1));
-                // // 再获取cam的世界坐标下的Right,Up，通过ViewMatrix的逆矩阵的第一行与第二行
-                // float3 camRight = UNITY_MATRIX_IT_MV[0].xyz;
-                // float3 camUp = UNITY_MATRIX_IT_MV[1].xyz;
-                // worldPos.xyz += // 使用原始顶点的大小与缩放系数：_BillboardSize来控制世界坐标下的顶点位置
-                // camRight * v.vertex.x + 
-                // camUp * v.vertex.y;
-                // // 最后将按照camRight,camUp重新调整后的worldPos，再转换到clipSpace，片段需要
-                // o.vertex = mul(UNITY_MATRIX_VP, worldPos);
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                float4 worldPos = mul(unity_ObjectToWorld, float4(0,0,0,1));
+                // 再获取cam的世界坐标下的Right,Up，通过ViewMatrix的逆矩阵的第一行与第二行
+                float3 camRight = UNITY_MATRIX_IT_MV[0].xyz;
+                float3 camUp = UNITY_MATRIX_IT_MV[1].xyz;
+                worldPos.xyz += // 使用原始顶点的大小与缩放系数：_BillboardSize来控制世界坐标下的顶点位置
+                camRight * v.vertex.x + 
+                camUp * v.vertex.y;
+                // 最后将按照camRight,camUp重新调整后的worldPos，再转换到clipSpace，片段需要
+                o.vertex = mul(UNITY_MATRIX_VP, worldPos);
                 o.uv = v.uv;
                 o.color = v.color;
                 return o;

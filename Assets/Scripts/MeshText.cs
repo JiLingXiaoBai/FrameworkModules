@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -17,12 +18,12 @@ public class MeshText : MonoBehaviour
 
     public float scale
     {
-        get { return _scale;}
+        get { return _scale; }
         set { _scale = value; }
     }
 
     [SerializeField] private Color _color1 = Color.white;
-    
+
     public Color color1
     {
         get { return _color1; }
@@ -80,38 +81,49 @@ public class MeshText : MonoBehaviour
         Vector2[] uvs = new Vector2[vertices.Length];
         int[] triangles = new int[(length << 1) * 3];
         Color[] colors = new Color[vertices.Length];
-        int tmp = 0;
-        float tmp2 = 0;
-        switch (HAlignType)
+        float tempX = 0;
+        float[] rates = new float[length];
+        Sprite[] sprites = new Sprite[length];
+        for (int i = 0; i < length; i++)
         {
-            case HorizontalAlignType.Center:
-                tmp2 = -(vertices.Length >> 3);
-                break;
-            case HorizontalAlignType.Left:
-                tmp2 = 0;
-                break;
-            case HorizontalAlignType.Right:
-                tmp2 = -(vertices.Length >> 2);
-                break;
-            default:
-                tmp2 = 0;
-                break;
+            uint c = Text[i];
+            var mSprite = meshFontTable[c];
+            sprites[i] = mSprite;
+            rates[i] = mSprite.rect.width / mSprite.rect.height;
         }
+
+        if (HAlignType == HorizontalAlignType.Left)
+        {
+            tempX = 0f;
+        }
+        else
+        {
+            var width = 0f;
+            foreach (var rate in rates)
+            {
+                width += rate;
+            }
+            if (HAlignType == HorizontalAlignType.Center)
+            {
+                tempX = -width / 2f;
+            }
+            else if (HAlignType == HorizontalAlignType.Right)
+            {
+                tempX = -width;
+            }
+        }
+
         for (int i = 0; i < vertices.Length; i += 4)
         {
-            tmp = (i + 1) % 2;
-
-            // string s = Text[i / 4].ToString();
-            // UISpriteData mSprite = uiAtlas.GetSprite(s);
-            uint c = Text[i / 4];
-            var mSprite = meshFontTable[c];
-            var r = (mSprite.rect.width * 1.0f / mSprite.rect.height);
+            var mSprite = sprites[i / 4]; 
+            var r = rates[i / 4];
             //setting vertices
-            vertices[i] = new Vector3(tmp2, tmp + 1) * _scale ;
-            vertices[i + 1] = new Vector3(tmp2, tmp) * _scale;
-            tmp2 += r;
-            vertices[i + 2] = new Vector3(tmp2, tmp + 1) * _scale;
-            vertices[i + 3] = new Vector3(tmp2, tmp) * _scale;
+
+            vertices[i] = new Vector3(tempX, 0.5f) * _scale;
+            vertices[i + 1] = new Vector3(tempX, -0.5f) * _scale;
+            tempX += r;
+            vertices[i + 2] = new Vector3(tempX, 0.5f) * _scale;
+            vertices[i + 3] = new Vector3(tempX, -0.5f) * _scale;
 
 
             colors[i] = color1;
@@ -136,7 +148,7 @@ public class MeshText : MonoBehaviour
 
         for (int i = 0; i < triangles.Length; i += 6)
         {
-            tmp = (i / 3) << 1;
+            var tmp = (i / 3) << 1;
             triangles[i] = triangles[i + 3] = tmp;
             triangles[i + 1] = triangles[i + 5] = tmp + 3;
             triangles[i + 2] = tmp + 1;
