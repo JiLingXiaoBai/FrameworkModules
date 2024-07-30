@@ -13,8 +13,16 @@ public class MeshText : MonoBehaviour
 
     public MeshFontTable meshFontTable;
 
-    [SerializeField] private Color _color1 = Color.white;
+    [SerializeField] private float _scale = 1f;
 
+    public float scale
+    {
+        get { return _scale;}
+        set { _scale = value; }
+    }
+
+    [SerializeField] private Color _color1 = Color.white;
+    
     public Color color1
     {
         get { return _color1; }
@@ -99,11 +107,11 @@ public class MeshText : MonoBehaviour
             var mSprite = meshFontTable[c];
             var r = (mSprite.rect.width * 1.0f / mSprite.rect.height);
             //setting vertices
-            vertices[i] = new Vector3(tmp2, tmp + 1);
-            vertices[i + 1] = new Vector3(tmp2, tmp);
+            vertices[i] = new Vector3(tmp2, tmp + 1) * _scale ;
+            vertices[i + 1] = new Vector3(tmp2, tmp) * _scale;
             tmp2 += r;
-            vertices[i + 2] = new Vector3(tmp2, tmp + 1);
-            vertices[i + 3] = new Vector3(tmp2, tmp);
+            vertices[i + 2] = new Vector3(tmp2, tmp + 1) * _scale;
+            vertices[i + 3] = new Vector3(tmp2, tmp) * _scale;
 
 
             colors[i] = color1;
