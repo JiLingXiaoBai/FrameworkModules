@@ -110,7 +110,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: txt_hurtcrit_0
+      name: txt_hurtcrit_1
       rect:
         serializedVersion: 2
         x: 6
@@ -118,7 +118,7 @@ TextureImporter:
         width: 35
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -131,7 +131,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_1
+      name: txt_hurtcrit_2
       rect:
         serializedVersion: 2
         x: 76
@@ -139,7 +139,7 @@ TextureImporter:
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -152,7 +152,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_2
+      name: txt_hurtcrit_3
       rect:
         serializedVersion: 2
         x: 152
@@ -160,7 +160,7 @@ TextureImporter:
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -173,15 +173,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_3
+      name: txt_hurtcrit_4
       rect:
         serializedVersion: 2
-        x: 228
+        x: 229
         y: 0
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -194,7 +194,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_4
+      name: txt_hurtcrit_5
       rect:
         serializedVersion: 2
         x: 304
@@ -202,7 +202,7 @@ TextureImporter:
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -215,7 +215,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_5
+      name: txt_hurtcrit_6
       rect:
         serializedVersion: 2
         x: 380
@@ -223,7 +223,7 @@ TextureImporter:
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -236,7 +236,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_6
+      name: txt_hurtcrit_7
       rect:
         serializedVersion: 2
         x: 456
@@ -244,7 +244,7 @@ TextureImporter:
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -257,7 +257,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_7
+      name: txt_hurtcrit_8
       rect:
         serializedVersion: 2
         x: 532
@@ -265,7 +265,7 @@ TextureImporter:
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -278,7 +278,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_8
+      name: txt_hurtcrit_9
       rect:
         serializedVersion: 2
         x: 608
@@ -286,7 +286,7 @@ TextureImporter:
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -299,7 +299,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: txt_hurtcrit_9
+      name: txt_hurtcrit_0
       rect:
         serializedVersion: 2
         x: 684
@@ -307,7 +307,7 @@ TextureImporter:
         width: 46
         height: 68
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -330,16 +330,16 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      txt_hurtcrit_0: 575649639
-      txt_hurtcrit_1: 1956489054
-      txt_hurtcrit_2: 1681508677
-      txt_hurtcrit_3: -1283787153
-      txt_hurtcrit_4: -1099258834
-      txt_hurtcrit_5: 987468571
-      txt_hurtcrit_6: 593182217
-      txt_hurtcrit_7: 1883387767
-      txt_hurtcrit_8: -1641122008
-      txt_hurtcrit_9: -1170270062
+      txt_hurtcrit_0: -1170270062
+      txt_hurtcrit_1: 575649639
+      txt_hurtcrit_2: 1956489054
+      txt_hurtcrit_3: 1681508677
+      txt_hurtcrit_4: -1283787153
+      txt_hurtcrit_5: -1099258834
+      txt_hurtcrit_6: 987468571
+      txt_hurtcrit_7: 593182217
+      txt_hurtcrit_8: 1883387767
+      txt_hurtcrit_9: -1641122008
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
