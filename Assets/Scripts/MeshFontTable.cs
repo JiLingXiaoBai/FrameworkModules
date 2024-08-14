@@ -70,6 +70,7 @@ public class MeshFontTable : ScriptableObject
 
     private void OnValidate()
     {
+        _lookUpTable ??= new Dictionary<uint, Sprite>();
         InitLookUpTable();
     }
 }
