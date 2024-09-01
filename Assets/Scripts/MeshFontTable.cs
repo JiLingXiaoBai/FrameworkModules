@@ -22,11 +22,9 @@ public class MeshFontTable : ScriptableObject
     {
         get
         {
-            if (_lookUpTable == null)
-            {
-                _lookUpTable = new Dictionary<uint, Sprite>();
-                InitLookUpTable();
-            }
+            if (_lookUpTable != null) return _lookUpTable.GetValueOrDefault(unicode);
+            _lookUpTable = new Dictionary<uint, Sprite>();
+            InitLookUpTable();
             return _lookUpTable.GetValueOrDefault(unicode);
         }
         set

@@ -4,23 +4,24 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using UnityEngine;
+using XBToolKit;
 using Object = UnityEngine.Object;
 
 public class GameLogger
 {
     // 普通调试日志开关
-    private const bool DebugLogEnable = true;
+    public static bool DebugLogEnable = true;
 
     // 警告日志开关
-    private const bool WarningLogEnable = true;
+    public static bool WarningLogEnable = true;
 
     // 错误日志开关
-    private const bool ErrorLogEnable = true;
+    public static bool ErrorLogEnable = true;
 
     // 将日志写入文件
-    private const bool LogToFile = true;
+    public static bool LogToFile = true;
 
-    private const int LogFileCount = 3;
+    public static int LogFileCount = 3;
 
     private static readonly string LogFileDir = Path.Combine(Application.persistentDataPath, "GameLog");
 
@@ -31,20 +32,30 @@ public class GameLogger
     private ConcurrentQueue<LogData> _concurrentQueue;
     private bool _threadRunning;
 
-    private class LogData
+    private class LogData : IReference
     {
         public string LogMsg;
         public string TraceMsg;
         public LogType Level;
+
+        public void Clear()
+        {
+        }
     }
 
     private GameLogger()
     {
     }
 
-
     public static void Open()
     {
+        var sb = new StringBuilder("GameLogger Init: \r\n");
+        sb.AppendLine($"DebugLogEnable: {DebugLogEnable}");
+        sb.AppendLine($"WarningLogEnable: {WarningLogEnable}");
+        sb.AppendLine($"ErrorLogEnable: {ErrorLogEnable}");
+        sb.AppendLine($"LogToFile: {LogToFile}");
+        sb.AppendLine($"LogFileCount: {LogFileCount}");
+        UnityEngine.Debug.Log(sb.ToString());
         if (!LogToFile || LogFileCount <= 0) return;
         _gameLogger ??= new GameLogger();
         _gameLogger.Awake();
@@ -99,6 +110,7 @@ public class GameLogger
         var logFileName = $"GameLog-{DateTime.Now:yyyyMMddHHmmss}.txt";
         var logFilePath = Path.Combine(LogFileDir, logFileName);
         _streamWriter = new StreamWriter(logFilePath);
+        _streamWriter.Write(GetSystemInfo());
         _manualResetEvent = new ManualResetEvent(false);
         _concurrentQueue = new ConcurrentQueue<LogData>();
         _threadRunning = true;
@@ -121,13 +133,10 @@ public class GameLogger
 
     private void OnLogMessageReceivedThread(string logString, string stackTrace, LogType logType)
     {
-        var logData = new LogData()
-        {
-            LogMsg = logString,
-            TraceMsg = stackTrace,
-            Level = logType,
-        };
-
+        var logData = ReferencePool.Acquire<LogData>();
+        logData.LogMsg = logString;
+        logData.TraceMsg = stackTrace;
+        logData.Level = logType;
         _concurrentQueue.Enqueue(logData);
         _manualResetEvent.Set();
     }
@@ -135,6 +144,8 @@ public class GameLogger
 
     private void FileLogThread()
     {
+        if (_streamWriter == null) return;
+
         while (_threadRunning)
         {
             _manualResetEvent.WaitOne();
@@ -150,6 +161,7 @@ public class GameLogger
                     LogType.Exception => $"[Exception] {GetLogTime()} {msg.LogMsg}\r\n{GetStackTraceStr(msg.TraceMsg)}",
                     _ => throw new ArgumentOutOfRangeException(nameof(msg.Level), msg.Level, null)
                 };
+                ReferencePool.Release(msg);
                 _streamWriter.Write(res);
                 _streamWriter.Write("\r\n");
             }
@@ -185,11 +197,13 @@ public class GameLogger
 
     private static string GetStackTraceStr(string traceMsg)
     {
-#if UNITY_EDITOR
-        for (var i = 0; i < 2; i++)
-#else
-        for (var i = 0; i < 1; i++)
+        var count = 2;
+        if (!traceMsg.Contains("GameLogger:"))
+            count--;
+#if !UNITY_EDITOR
+        count--;
 #endif
+        for (var i = 0; i < count; i++)
         {
             traceMsg = traceMsg.Remove(0, traceMsg.IndexOf('\n') + 1);
         }
@@ -222,7 +236,6 @@ public class GameLogger
         sb.AppendLine("显卡版本:  " + SystemInfo.graphicsDeviceVersion);
         sb.AppendLine("显存大小:  " + SystemInfo.graphicsMemorySize);
         sb.AppendLine("显卡着色器级别:  " + SystemInfo.graphicsShaderLevel);
-        sb.AppendLine("是否图像效果:  " + SystemInfo.supportsImageEffects);
         sb.AppendLine("是否支持内置阴影:  " + SystemInfo.supportsShadows);
         sb.AppendLine(
             "*********************************************************************************************************end");
