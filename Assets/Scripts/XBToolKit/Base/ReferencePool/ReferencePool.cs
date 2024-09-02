@@ -22,12 +22,13 @@ namespace XBToolKit
 
         public static T Acquire<T>() where T : class, IReference, new()
         {
-            return GetReferenceCollection(typeof(T)).AcquireReference<T>();
+            return GetReferenceCollection(typeof(T)).AcquireReference() as T;
         }
 
         public static void Release<T>(ref T reference) where T : class, IReference, new()
         {
-            GetReferenceCollection(reference.GetType()).ReleaseReference(ref reference);
+            GetReferenceCollection(reference.GetType()).ReleaseReference(reference);
+            reference = null;
         }
 
         public static IReference Acquire(Type referenceType)
@@ -44,7 +45,8 @@ namespace XBToolKit
             }
             var referenceType = reference.GetType();
             InternalCheckReferenceType(referenceType);
-            GetReferenceCollection(referenceType).ReleaseReference(ref reference);
+            GetReferenceCollection(referenceType).ReleaseReference(reference);
+            reference = null;
         }
 
         public static void Add<T>(int count) where T : class, IReference, new()
