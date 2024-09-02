@@ -161,7 +161,7 @@ public class GameLogger
                     LogType.Exception => $"[Exception] {GetLogTime()} {msg.LogMsg}\r\n{GetStackTraceStr(msg.TraceMsg)}",
                     _ => throw new ArgumentOutOfRangeException(nameof(msg.Level), msg.Level, null)
                 };
-                ReferencePool.Release(msg);
+                ReferencePool.Release(ref msg);
                 _streamWriter.Write(res);
                 _streamWriter.Write("\r\n");
             }

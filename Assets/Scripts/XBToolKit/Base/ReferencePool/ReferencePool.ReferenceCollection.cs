@@ -45,8 +45,7 @@ namespace XBToolKit
                 return (IReference)Activator.CreateInstance(ReferenceType);
             }
 
-
-            public void ReleaseReference(IReference reference)
+            public void ReleaseReference<T>(ref T reference) where T : class, IReference, new()
             {
                 reference.Clear();
                 lock (_references)
@@ -57,6 +56,21 @@ namespace XBToolKit
                     }
                     _references.Enqueue(reference);
                 }
+                reference = null;
+            }
+
+            public void ReleaseReference(ref IReference reference)
+            {
+                reference.Clear();
+                lock (_references)
+                {
+                    if (_references.Contains(reference))
+                    {
+                        throw new Exception("The reference has been released.");
+                    }
+                    _references.Enqueue(reference);
+                }
+                reference = null;
             }
 
             public void AddReference<T>(int count) where T : class, IReference, new()
