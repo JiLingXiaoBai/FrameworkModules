@@ -8,13 +8,12 @@ namespace XBToolKit
         private sealed class ReferenceCollection
         {
             private readonly Queue<IReference> _references;
-            private Type ReferenceType { get; }
-
+            private readonly Type _referenceType;
 
             public ReferenceCollection(Type referenceType)
             {
                 _references = new Queue<IReference>();
-                ReferenceType = referenceType;
+                _referenceType = referenceType;
             }
 
             public IReference AcquireReference()
@@ -26,7 +25,7 @@ namespace XBToolKit
                         return _references.Dequeue();
                     }
                 }
-                return (IReference)Activator.CreateInstance(ReferenceType);
+                return (IReference)Activator.CreateInstance(_referenceType);
             }
 
             public void ReleaseReference(IReference reference)
@@ -42,21 +41,6 @@ namespace XBToolKit
                 }
             }
 
-            public void AddReference<T>(int count) where T : class, IReference, new()
-            {
-                if (typeof(T) != ReferenceType)
-                {
-                    throw new Exception("Type is invalid.");
-                }
-
-                lock (_references)
-                {
-                    while (count-- > 0)
-                    {
-                        _references.Enqueue(new T());
-                    }
-                }
-            }
 
             public void AddReference(int count)
             {
@@ -64,7 +48,7 @@ namespace XBToolKit
                 {
                     while (count-- > 0)
                     {
-                        _references.Enqueue((IReference)Activator.CreateInstance(ReferenceType));
+                        _references.Enqueue((IReference)Activator.CreateInstance(_referenceType));
                     }
                 }
             }

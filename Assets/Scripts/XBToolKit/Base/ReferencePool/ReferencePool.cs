@@ -51,7 +51,7 @@ namespace XBToolKit
 
         public static void Add<T>(int count) where T : class, IReference, new()
         {
-            GetReferenceCollection(typeof(T)).AddReference<T>(count);
+            GetReferenceCollection(typeof(T)).AddReference(count);
         }
 
         public static void Add(Type referenceType, int count)
