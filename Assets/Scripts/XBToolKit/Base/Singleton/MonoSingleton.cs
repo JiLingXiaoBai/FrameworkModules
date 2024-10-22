@@ -14,7 +14,7 @@ namespace XBToolKit
             get
             {
                 if (_instance != null) return _instance;
-                _instance = FindObjectOfType<T>();
+                _instance = FindFirstObjectByType<T>();
                 if (_instance == null)
                 {
                     GameObject obj = new(typeof(T).Name);
