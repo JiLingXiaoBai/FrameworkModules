@@ -52,8 +52,10 @@ public class MeshFontTable : ScriptableObject
                     sprite = value
                 });
             }
+#if UNITY_EDITOR
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssetIfDirty(this);
+#endif
         }
     }
 
