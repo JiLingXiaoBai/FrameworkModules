@@ -9,6 +9,18 @@ namespace XBToolKit
         {
             private readonly Queue<IReference> _references;
             private readonly Type _referenceType;
+            
+            public int Count
+            {
+                get
+                {
+                    if (_references == null) return 0;
+                    lock (_references)
+                    {
+                        return _references.Count;
+                    }
+                }
+            }
 
             public ReferenceCollection(Type referenceType)
             {

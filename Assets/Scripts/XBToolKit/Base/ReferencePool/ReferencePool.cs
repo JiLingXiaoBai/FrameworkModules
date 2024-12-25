@@ -19,6 +19,18 @@ namespace XBToolKit
             }
         }
 
+        public static void CheckTypeCount()
+        {
+            lock (ReferenceCollections)
+            {
+                foreach (var referenceCollection in ReferenceCollections)
+                {
+                    UnityEngine.Debug.Log("Type: " + referenceCollection.Key + " Count: " +
+                                          referenceCollection.Value.Count);
+                }
+            }
+        }
+
 
         public static T Acquire<T>() where T : class, IReference, new()
         {

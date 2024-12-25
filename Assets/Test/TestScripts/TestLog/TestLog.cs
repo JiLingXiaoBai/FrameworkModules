@@ -1,4 +1,5 @@
 using UnityEngine;
+using XBToolKit;
 
 public class TestLog : MonoBehaviour
 {
@@ -29,5 +30,6 @@ public class TestLog : MonoBehaviour
     private void OnDestroy()
     {
         GameLogger.Close();
+        ReferencePool.CheckTypeCount();
     }
 }
