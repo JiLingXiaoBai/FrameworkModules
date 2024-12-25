@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using UnityEngine;
-using XBToolKit;
 using Object = UnityEngine.Object;
 
 public class GameLogger
@@ -30,17 +29,15 @@ public class GameLogger
     private StreamWriter _streamWriter;
     private ManualResetEvent _manualResetEvent;
     private ConcurrentQueue<LogData> _concurrentQueue;
+    private ConcurrentQueue<LogData> _cacheQueue;
     private bool _threadRunning;
 
-    private class LogData : IReference
+
+    private class LogData
     {
         public string LogMsg;
         public string TraceMsg;
         public LogType Level;
-
-        public void Clear()
-        {
-        }
     }
 
     private GameLogger()
@@ -113,6 +110,7 @@ public class GameLogger
         _streamWriter.Write(GetSystemInfo());
         _manualResetEvent = new ManualResetEvent(false);
         _concurrentQueue = new ConcurrentQueue<LogData>();
+        _cacheQueue = new ConcurrentQueue<LogData>();
         _threadRunning = true;
 
         Application.logMessageReceivedThreaded += OnLogMessageReceivedThread;
@@ -133,7 +131,10 @@ public class GameLogger
 
     private void OnLogMessageReceivedThread(string logString, string stackTrace, LogType logType)
     {
-        var logData = ReferencePool.Acquire<LogData>();
+        if (!_cacheQueue.TryDequeue(out var logData))
+        {
+            logData = new LogData();
+        }
         logData.LogMsg = logString;
         logData.TraceMsg = stackTrace;
         logData.Level = logType;
@@ -161,7 +162,7 @@ public class GameLogger
                     LogType.Exception => $"[Exception] {GetLogTime()} {msg.LogMsg}\r\n{GetStackTraceStr(msg.TraceMsg)}",
                     _ => throw new ArgumentOutOfRangeException(nameof(msg.Level), msg.Level, null)
                 };
-                ReferencePool.Release(ref msg);
+                _cacheQueue.Enqueue(msg);
                 _streamWriter.Write(res);
                 _streamWriter.Write("\r\n");
             }

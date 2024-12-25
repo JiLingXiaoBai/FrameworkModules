@@ -30,6 +30,5 @@ public class TestLog : MonoBehaviour
     private void OnDestroy()
     {
         GameLogger.Close();
-        ReferencePool.CheckTypeCount();
     }
 }

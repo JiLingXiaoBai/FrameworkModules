@@ -9,18 +9,8 @@ namespace XBToolKit
         {
             private readonly Queue<IReference> _references;
             private readonly Type _referenceType;
-            
-            public int Count
-            {
-                get
-                {
-                    if (_references == null) return 0;
-                    lock (_references)
-                    {
-                        return _references.Count;
-                    }
-                }
-            }
+
+            public int Count => _references?.Count ?? 0;
 
             public ReferenceCollection(Type referenceType)
             {
@@ -30,12 +20,9 @@ namespace XBToolKit
 
             public IReference AcquireReference()
             {
-                lock (_references)
+                if (_references.Count > 0)
                 {
-                    if (_references.Count > 0)
-                    {
-                        return _references.Dequeue();
-                    }
+                    return _references.Dequeue();
                 }
                 return (IReference)Activator.CreateInstance(_referenceType);
             }
@@ -43,49 +30,38 @@ namespace XBToolKit
             public void ReleaseReference(IReference reference)
             {
                 reference.Clear();
-                lock (_references)
+
+                if (_references.Contains(reference))
                 {
-                    if (_references.Contains(reference))
-                    {
-                        throw new Exception("The reference has been released.");
-                    }
-                    _references.Enqueue(reference);
+                    throw new Exception("The reference has been released.");
                 }
+                _references.Enqueue(reference);
             }
 
 
             public void AddReference(int count)
             {
-                lock (_references)
+                while (count-- > 0)
                 {
-                    while (count-- > 0)
-                    {
-                        _references.Enqueue((IReference)Activator.CreateInstance(_referenceType));
-                    }
+                    _references.Enqueue((IReference)Activator.CreateInstance(_referenceType));
                 }
             }
 
             public void RemoveReference(int count)
             {
-                lock (_references)
+                if (count > _references.Count)
                 {
-                    if (count > _references.Count)
-                    {
-                        count = _references.Count;
-                    }
-                    while (count-- > 0)
-                    {
-                        _references.Dequeue();
-                    }
+                    count = _references.Count;
+                }
+                while (count-- > 0)
+                {
+                    _references.Dequeue();
                 }
             }
 
             public void RemoveAllReferences()
             {
-                lock (_references)
-                {
-                    _references.Clear();
-                }
+                _references.Clear();
             }
         }
     }

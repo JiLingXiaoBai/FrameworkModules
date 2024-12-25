@@ -3,31 +3,26 @@ using System.Collections.Generic;
 
 namespace XBToolKit
 {
+    // 单线程对象池，用于管理对象的创建和回收
     public static partial class ReferencePool
     {
         private static readonly Dictionary<Type, ReferenceCollection> ReferenceCollections = new();
 
         public static void ClearAll()
         {
-            lock (ReferenceCollections)
+            foreach (var referenceCollection in ReferenceCollections)
             {
-                foreach (var referenceCollection in ReferenceCollections)
-                {
-                    referenceCollection.Value.RemoveAllReferences();
-                }
-                ReferenceCollections.Clear();
+                referenceCollection.Value.RemoveAllReferences();
             }
+            ReferenceCollections.Clear();
         }
 
         public static void CheckTypeCount()
         {
-            lock (ReferenceCollections)
+            foreach (var referenceCollection in ReferenceCollections)
             {
-                foreach (var referenceCollection in ReferenceCollections)
-                {
-                    UnityEngine.Debug.Log("Type: " + referenceCollection.Key + " Count: " +
-                                          referenceCollection.Value.Count);
-                }
+                UnityEngine.Debug.Log("Type: " + referenceCollection.Key + " Count: " +
+                                      referenceCollection.Value.Count);
             }
         }
 
@@ -111,14 +106,10 @@ namespace XBToolKit
             if (referenceType == null)
                 throw new Exception("ReferenceType is invalid.");
 
-            ReferenceCollection referenceCollection;
-            lock (ReferenceCollections)
-            {
-                if (ReferenceCollections.TryGetValue(referenceType, out referenceCollection))
-                    return referenceCollection;
-                referenceCollection = new ReferenceCollection(referenceType);
-                ReferenceCollections.Add(referenceType, referenceCollection);
-            }
+            if (ReferenceCollections.TryGetValue(referenceType, out var  referenceCollection))
+                return referenceCollection;
+            referenceCollection = new ReferenceCollection(referenceType);
+            ReferenceCollections.Add(referenceType, referenceCollection);
             return referenceCollection;
         }
     }
