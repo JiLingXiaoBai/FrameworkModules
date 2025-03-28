@@ -1,14 +1,14 @@
+using System;
 using System.Collections;
 using UnityEngine.Internal;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace XBToolKit
 {
     public class MonoMgr : MonoSingleton<MonoMgr>
     {
-        private event UnityAction UpdateEvent;
-        private event UnityAction DestroyEvent;
+        private event Action UpdateEvent;
+        private event Action DestroyEvent;
         private MonoBehaviour _mono;
         private MonoMgr() { }
         private void Awake()
@@ -28,21 +28,21 @@ namespace XBToolKit
             UpdateEvent = null;
         }
 
-        public void AddUpdateListener(UnityAction func)
+        public void AddUpdateListener(Action func)
         {
             UpdateEvent += func;
         }
-        public void RemoveUpdateListener(UnityAction func)
+        public void RemoveUpdateListener(Action func)
         {
             UpdateEvent -= func;
         }
 
-        public void AddDestroyListener(UnityAction func)
+        public void AddDestroyListener(Action func)
         {
             DestroyEvent += func;
         }
 
-        public void RemoveDestroyListener(UnityAction func)
+        public void RemoveDestroyListener(Action func)
         {
             DestroyEvent -= func;
         }
@@ -60,7 +60,5 @@ namespace XBToolKit
         {
             return _mono.StartCoroutine(methodName);
         }
-
-
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine.Events;
 
 namespace XBToolKit.EventCenter
 {
@@ -12,9 +11,9 @@ namespace XBToolKit.EventCenter
 
         private class EventData : IEventData
         {
-            public UnityAction EventActions;
+            public Action EventActions;
 
-            public EventData(UnityAction action)
+            public EventData(Action action)
             {
                 EventActions += action;
             }
@@ -22,9 +21,9 @@ namespace XBToolKit.EventCenter
 
         private class EventData<T> : IEventData
         {
-            public UnityAction<T> EventActions;
+            public Action<T> EventActions;
 
-            public EventData(UnityAction<T> action)
+            public EventData(Action<T> action)
             {
                 EventActions += action;
             }
@@ -32,9 +31,9 @@ namespace XBToolKit.EventCenter
 
         private class EventData<T0, T1> : IEventData
         {
-            public UnityAction<T0, T1> EventActions;
+            public Action<T0, T1> EventActions;
 
-            public EventData(UnityAction<T0, T1> action)
+            public EventData(Action<T0, T1> action)
             {
                 EventActions += action;
             }
@@ -42,9 +41,9 @@ namespace XBToolKit.EventCenter
 
         private class EventData<T0, T1, T2> : IEventData
         {
-            public UnityAction<T0, T1, T2> EventActions;
+            public Action<T0, T1, T2> EventActions;
 
-            public EventData(UnityAction<T0, T1, T2> action)
+            public EventData(Action<T0, T1, T2> action)
             {
                 EventActions += action;
             }
@@ -52,9 +51,9 @@ namespace XBToolKit.EventCenter
 
         private class EventData<T0, T1, T2, T3> : IEventData
         {
-            public UnityAction<T0, T1, T2, T3> EventActions;
+            public Action<T0, T1, T2, T3> EventActions;
 
-            public EventData(UnityAction<T0, T1, T2, T3> action)
+            public EventData(Action<T0, T1, T2, T3> action)
             {
                 EventActions += action;
             }
@@ -104,7 +103,7 @@ namespace XBToolKit.EventCenter
         }
 
         //no parameters
-        public static void Register(string key, UnityAction action)
+        public static void Register(string key, Action action)
         {
             OnRegistering(key, new EventData(action));
 
@@ -119,7 +118,7 @@ namespace XBToolKit.EventCenter
         }
 
         //single parameter
-        public static void Register<T>(string key, UnityAction<T> action)
+        public static void Register<T>(string key, Action<T> action)
         {
             OnRegistering(key, new EventData<T>(action));
 
@@ -134,7 +133,7 @@ namespace XBToolKit.EventCenter
         }
 
         //two parameters
-        public static void Register<T0, T1>(string key, UnityAction<T0, T1> action)
+        public static void Register<T0, T1>(string key, Action<T0, T1> action)
         {
             OnRegistering(key, new EventData<T0, T1>(action));
 
@@ -149,7 +148,7 @@ namespace XBToolKit.EventCenter
         }
 
         //three parameters
-        public static void Register<T0, T1, T2>(string key, UnityAction<T0, T1, T2> action)
+        public static void Register<T0, T1, T2>(string key, Action<T0, T1, T2> action)
         {
             OnRegistering(key, new EventData<T0, T1, T2>(action));
             if (MEventTable[key] == null)
@@ -163,7 +162,7 @@ namespace XBToolKit.EventCenter
         }
 
         //four parameters
-        public static void Register<T0, T1, T2, T3>(string key, UnityAction<T0, T1, T2, T3> action)
+        public static void Register<T0, T1, T2, T3>(string key, Action<T0, T1, T2, T3> action)
         {
             OnRegistering(key, new EventData<T0, T1, T2, T3>(action));
             if (MEventTable[key] == null)
@@ -178,7 +177,7 @@ namespace XBToolKit.EventCenter
 
 
         //no parameters
-        public static void Remove(string key, UnityAction action)
+        public static void Remove(string key, Action action)
         {
             OnRemoving(key, new EventData(action));
             ((EventData)MEventTable[key]).EventActions -= action;
@@ -186,7 +185,7 @@ namespace XBToolKit.EventCenter
         }
 
         //single parameter
-        public static void Remove<T>(string key, UnityAction<T> action)
+        public static void Remove<T>(string key, Action<T> action)
         {
             OnRemoving(key, new EventData<T>(action));
             ((EventData<T>)MEventTable[key]).EventActions -= action;
@@ -194,7 +193,7 @@ namespace XBToolKit.EventCenter
         }
 
         //two parameters
-        public static void Remove<T0, T1>(string key, UnityAction<T0, T1> action)
+        public static void Remove<T0, T1>(string key, Action<T0, T1> action)
         {
             OnRemoving(key, new EventData<T0, T1>(action));
             ((EventData<T0, T1>)MEventTable[key]).EventActions -= action;
@@ -202,7 +201,7 @@ namespace XBToolKit.EventCenter
         }
 
         //three parameters
-        public static void Remove<T0, T1, T2>(string key, UnityAction<T0, T1, T2> action)
+        public static void Remove<T0, T1, T2>(string key, Action<T0, T1, T2> action)
         {
             OnRemoving(key, new EventData<T0, T1, T2>(action));
             ((EventData<T0, T1, T2>)MEventTable[key]).EventActions -= action;
@@ -210,7 +209,7 @@ namespace XBToolKit.EventCenter
         }
 
         //four parameters
-        public static void Remove<T0, T1, T2, T3>(string key, UnityAction<T0, T1, T2, T3> action)
+        public static void Remove<T0, T1, T2, T3>(string key, Action<T0, T1, T2, T3> action)
         {
             OnRemoving(key, new EventData<T0, T1, T2, T3>(action));
             ((EventData<T0, T1, T2, T3>)MEventTable[key]).EventActions -= action;
