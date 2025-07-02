@@ -1,4 +1,4 @@
-namespace XBToolKit.FName
+namespace XBToolKit
 {
     using System;
 

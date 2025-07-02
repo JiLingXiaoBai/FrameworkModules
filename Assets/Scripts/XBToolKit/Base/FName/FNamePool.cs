@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace XBToolKit.FName
+namespace XBToolKit
 {
     public static class FNamePool
     {
