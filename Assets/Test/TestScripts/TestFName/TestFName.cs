@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using XBToolKit.FName;
+using XBToolKit;
 
 namespace Test.TestScripts.TestFName
 {
